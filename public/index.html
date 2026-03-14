@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoteSnap — Smart Study Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f0e8;
+    --cream: #ede7d5;
+    --accent: #d4541a;
+    --accent2: #2d6a4f;
+    --muted: #8a7f6e;
+    --highlight: #f0c060;
+    --border: #c8bfa8;
+    --card: #faf7f2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: 'DM Mono', monospace; min-height: 100vh; }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 3rem; border-bottom: 1.5px solid var(--border); background: var(--card); }
+  .logo-mark { font-family: 'Instrument Serif', serif; font-size: 1.75rem; font-style: italic; color: var(--accent); }
+  .logo-sub  { font-family: 'Syne', sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-left: 0.4rem; }
+  .badge { background: var(--ink); color: var(--paper); font-family: 'Syne', sans-serif; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.28rem 0.75rem; border-radius: 2px; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+
+  .hero { text-align: center; margin-bottom: 2.5rem; }
+  .hero h1 { font-family: 'Instrument Serif', serif; font-size: clamp(2.4rem, 5vw, 4rem); font-style: italic; line-height: 1.08; letter-spacing: -1.5px; margin-bottom: 0.8rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--muted); font-size: 0.82rem; max-width: 400px; margin: 0 auto; line-height: 1.75; }
+
+  .upload-area { border: 2px dashed var(--border); border-radius: 6px; padding: 3rem 2rem; text-align: center; background: var(--card); transition: border-color 0.2s, background 0.2s; }
+  .upload-area.drag { border-color: var(--accent); background: #fdf9f4; }
+  .upload-icon { font-size: 2.8rem; display: block; margin-bottom: 0.9rem; }
+  .upload-area h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.4rem; }
+  .upload-area p  { color: var(--muted); font-size: 0.73rem; margin-bottom: 1.4rem; }
+  .pick-btn { display: inline-block; padding: 0.75rem 2.2rem; background: var(--ink); color: var(--paper); font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; border-radius: 3px; border: none; cursor: pointer; transition: background 0.18s; }
+  .pick-btn:hover { background: var(--accent); }
+  #file-input { display: none; }
+
+  .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.7rem; margin-top: 1.2rem; }
+  .preview-item { position: relative; border-radius: 3px; overflow: hidden; border: 1.5px solid var(--border); aspect-ratio: 3/4; }
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .preview-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  .options-block { display: none; margin: 1.3rem 0; }
+  .options-block.show { display: block; }
+  .opt-row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-bottom: 0.6rem; }
+  .opt-label { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.13em; color: var(--muted); min-width: 70px; }
+  .chip-group { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .chip { padding: 0.28rem 0.75rem; border: 1.5px solid var(--border); border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 0.67rem; cursor: pointer; background: transparent; color: var(--muted); transition: all 0.12s; }
+  .chip.on, .chip:hover { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+
+  .scan-btn { width: 100%; margin-top: 0.9rem; padding: 1rem; background: var(--accent); color: #fff; font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; border: none; border-radius: 3px; cursor: pointer; transition: background 0.18s, transform 0.15s, box-shadow 0.15s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  .scan-btn:hover:not(:disabled) { background: #b83d10; transform: translateY(-2px); box-shadow: 0 5px 16px rgba(212,84,26,0.28); }
+  .scan-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+  .error-msg { display: none; background: #fef2ee; border: 1.5px solid #f4b4a0; border-radius: 3px; padding: 0.8rem 1rem; color: var(--accent); font-size: 0.78rem; margin-top: 0.9rem; line-height: 1.5; }
+  .error-msg.show { display: block; }
+
+  .loading-wrap { display: none; text-align: center; padding: 4rem 2rem; }
+  .loading-wrap.show { display: block; }
+  .rings { position: relative; width: 68px; height: 68px; margin: 0 auto 1.5rem; }
+  .ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid transparent; animation: spin 1.2s linear infinite; }
+  .ring:nth-child(1) { border-top-color: var(--accent); }
+  .ring:nth-child(2) { inset: 9px; border-right-color: var(--ink); animation-duration: 0.85s; animation-direction: reverse; }
+  .ring:nth-child(3) { inset: 18px; border-bottom-color: var(--accent2); animation-duration: 1.5s; }
+  .load-label { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); }
+  .load-step  { margin-top: 0.6rem; font-size: 0.67rem; color: var(--muted); animation: pulse 2s ease infinite; }
+
+  .results-wrap { display: none; }
+  .results-wrap.show { display: block; }
+  .results-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.7rem; margin-bottom: 1.2rem; padding-bottom: 0.9rem; border-bottom: 1.5px solid var(--border); }
+  .results-top h2 { font-family: 'Instrument Serif', serif; font-size: 1.65rem; font-style: italic; }
+  .act-row { display: flex; gap: 0.4rem; }
+  .act-btn { padding: 0.4rem 0.9rem; border: 1.5px solid var(--border); border-radius: 2px; font-family: 'Syne', sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; background: transparent; color: var(--ink); transition: all 0.12s; }
+  .act-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .act-btn.g { border-color: var(--accent2); color: var(--accent2); }
+  .act-btn.g:hover { background: var(--accent2); color: #fff; }
+
+  .notes-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .ntabs { display: flex; border-bottom: 1.5px solid var(--border); background: var(--cream); }
+  .ntab { padding: 0.65rem 1.1rem; font-family: 'Syne', sans-serif; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border: none; background: transparent; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: all 0.12s; }
+  .ntab.on { color: var(--ink); border-bottom-color: var(--accent); background: var(--card); }
+  .tpane { display: none; padding: 1.6rem; }
+  .tpane.on { display: block; }
+  .raw-out { font-size: 0.8rem; line-height: 1.8; white-space: pre-wrap; max-height: 560px; overflow-y: auto; }
+
+  .rendered h1 { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1.5rem;  margin: 1.3rem 0 0.4rem; }
+  .rendered h2 { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1.2rem;  color: var(--accent);  margin: 1.2rem 0 0.35rem; }
+  .rendered h3 { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 1.02rem; color: var(--accent2); margin: 1rem 0 0.3rem; }
+  .rendered p  { font-size: 0.82rem; line-height: 1.72; margin-bottom: 0.65rem; }
+  .rendered ul { padding-left: 1.35rem; margin-bottom: 0.65rem; }
+  .rendered li { font-size: 0.82rem; line-height: 1.6; margin-bottom: 0.28rem; }
+  .rendered strong { color: var(--accent); }
+  .rendered em     { color: var(--accent2); }
+  .rendered code   { background: var(--cream); padding: 0.08em 0.35em; border-radius: 2px; font-size: 0.84em; }
+  .rendered blockquote { border-left: 3px solid var(--accent); padding-left: 0.85rem; color: var(--muted); margin: 0.65rem 0; font-style: italic; }
+  .rendered hr { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+
+  .toast { position: fixed; bottom: 1.8rem; right: 1.8rem; background: var(--ink); color: var(--paper); padding: 0.6rem 1rem; border-radius: 3px; font-family: 'Syne', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0; transform: translateY(60px); transition: all 0.26s ease; z-index: 500; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @keyframes spin  { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.45; } }
+
+  @media (max-width: 560px) {
+    header { padding: 1rem 1.2rem; }
+    main   { padding: 1.4rem 1rem; }
+    .hero h1 { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <span class="logo-mark">NoteSnap</span>
+    <span class="logo-sub">for students</span>
+  </div>
+  <span class="badge">Gemini AI</span>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Turn photos into<br><span>smart notes</span></h1>
+    <p>Upload photos of books, notebooks, or handwritten pages and get clean structured study notes instantly.</p>
+  </div>
+
+  <div id="upload-section">
+    <div class="upload-area" id="upload-area">
+      <span class="upload-icon">📸</span>
+      <h3>Drop pages here</h3>
+      <p>Books · Notebooks · Handwritten notes · Textbook pages</p>
+      <button class="pick-btn" id="pick-btn">↑ Choose Photos</button>
+    </div>
+    <input type="file" id="file-input" accept="image/*" multiple>
+
+    <div class="preview-grid" id="preview-grid"></div>
+
+    <div class="options-block" id="options-block">
+      <div class="opt-row">
+        <span class="opt-label">Style</span>
+        <div class="chip-group" id="style-chips">
+          <button class="chip on" data-v="structured">Structured</button>
+          <button class="chip"    data-v="bullet">Bullet Points</button>
+          <button class="chip"    data-v="summary">Summary</button>
+          <button class="chip"    data-v="flashcards">Flashcards</button>
+        </div>
+      </div>
+      <div class="opt-row">
+        <span class="opt-label">Subject</span>
+        <div class="chip-group" id="subject-chips">
+          <button class="chip on" data-v="general">General</button>
+          <button class="chip"    data-v="math">Math</button>
+          <button class="chip"    data-v="science">Science</button>
+          <button class="chip"    data-v="history">History</button>
+          <button class="chip"    data-v="literature">Literature</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <button class="scan-btn" id="scan-btn" disabled>✦ Generate Notes</button>
+  </div>
+
+  <div class="loading-wrap" id="loading-wrap">
+    <div class="rings">
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+    </div>
+    <div class="load-label">Analysing your pages</div>
+    <div class="load-step" id="load-step">Reading content…</div>
+  </div>
+
+  <div class="results-wrap" id="results-wrap">
+    <div class="results-top">
+      <h2>Your Notes</h2>
+      <div class="act-row">
+        <button class="act-btn g" id="btn-copy">⎘ Copy</button>
+        <button class="act-btn"   id="btn-dl">↓ Download</button>
+        <button class="act-btn"   id="btn-reset">↺ New Scan</button>
+      </div>
+    </div>
+    <div class="notes-card">
+      <div class="ntabs">
+        <button class="ntab on" id="ntab-preview">Preview</button>
+        <button class="ntab"    id="ntab-raw">Raw Text</button>
+      </div>
+      <div class="tpane on" id="pane-preview"><div class="rendered" id="rendered-out"></div></div>
+      <div class="tpane"    id="pane-raw"><div class="raw-out" id="raw-out"></div></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var files   = [];
+var rawText = "";
+var style   = "structured";
+var subject = "general";
+
+var pickBtn       = document.getElementById("pick-btn");
+var fileInput     = document.getElementById("file-input");
+var uploadArea    = document.getElementById("upload-area");
+var previewGrid   = document.getElementById("preview-grid");
+var optionsBlock  = document.getElementById("options-block");
+var scanBtn       = document.getElementById("scan-btn");
+var errorMsg      = document.getElementById("error-msg");
+var loadingWrap   = document.getElementById("loading-wrap");
+var loadStep      = document.getElementById("load-step");
+var resultsWrap   = document.getElementById("results-wrap");
+var uploadSection = document.getElementById("upload-section");
+
+pickBtn.addEventListener("click", function(e) {
+  e.stopPropagation();
+  fileInput.click();
+});
+
+fileInput.addEventListener("change", function() {
+  if (this.files && this.files.length > 0) {
+    addFiles(Array.from(this.files));
+    this.value = "";
+  }
+});
+
+uploadArea.addEventListener("dragover", function(e) { e.preventDefault(); this.classList.add("drag"); });
+uploadArea.addEventListener("dragleave", function()  { this.classList.remove("drag"); });
+uploadArea.addEventListener("drop", function(e) {
+  e.preventDefault();
+  this.classList.remove("drag");
+  var imgs = Array.from(e.dataTransfer.files).filter(function(f) { return f.type.startsWith("image/"); });
+  if (imgs.length) addFiles(imgs);
+});
+
+function addFiles(newFiles) {
+  newFiles.forEach(function(f) { var idx = files.length; files.push(f); renderThumb(f, idx); });
+  sync();
+}
+
+function renderThumb(file, idx) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var div = document.createElement("div");
+    div.className = "preview-item";
+    div.id = "pi-" + idx;
+    div.innerHTML = '<img src="' + e.target.result + '" alt="page"><button class="preview-remove" data-i="' + idx + '">✕</button>';
+    previewGrid.appendChild(div);
+  };
+  reader.readAsDataURL(file);
+}
+
+previewGrid.addEventListener("click", function(e) {
+  var btn = e.target.closest(".preview-remove");
+  if (!btn) return;
+  files.splice(parseInt(btn.getAttribute("data-i"), 10), 1);
+  previewGrid.innerHTML = "";
+  files.forEach(function(f, i) { renderThumb(f, i); });
+  sync();
+});
+
+function sync() {
+  var has = files.length > 0;
+  scanBtn.disabled = !has;
+  optionsBlock.classList.toggle("show", has);
+  errorMsg.classList.remove("show");
+}
+
+document.getElementById("style-chips").addEventListener("click", function(e) {
+  var c = e.target.closest(".chip"); if (!c) return;
+  this.querySelectorAll(".chip").forEach(function(x) { x.classList.remove("on"); });
+  c.classList.add("on"); style = c.getAttribute("data-v");
+});
+document.getElementById("subject-chips").addEventListener("click", function(e) {
+  var c = e.target.closest(".chip"); if (!c) return;
+  this.querySelectorAll(".chip").forEach(function(x) { x.classList.remove("on"); });
+  c.classList.add("on"); subject = c.getAttribute("data-v");
+});
+
+scanBtn.addEventListener("click", generate);
+
+var loadMsgs = ["Reading your handwriting…","Extracting key concepts…","Structuring the content…","Polishing your notes…"];
+
+function toBase64(file) {
+  return new Promise(function(resolve, reject) {
+    var r = new FileReader();
+    r.onload  = function() { resolve(r.result.split(",")[1]); };
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function generate() {
+  if (!files.length) return;
+  uploadSection.style.display = "none";
+  resultsWrap.classList.remove("show");
+  loadingWrap.classList.add("show");
+  errorMsg.classList.remove("show");
+
+  var mi = 0;
+  var ticker = setInterval(function() { loadStep.textContent = loadMsgs[mi++ % loadMsgs.length]; }, 1900);
+
+  try {
+    var styleMap = {
+      structured: "well-structured notes with ## headings, ### subheadings, and organised sections",
+      bullet:     "concise bullet-point notes — every key fact as a bullet",
+      summary:    "a comprehensive flowing summary covering all main points",
+      flashcards: "flashcard Q&A pairs:\n**Q:** [question]\n**A:** [answer]\n\n(blank line between each card)"
+    };
+    var subjectHints = {
+      general:"", math:"Preserve all formulas exactly.", science:"Highlight scientific terms and principles.",
+      history:"Focus on dates, events, people, causes and effects.", literature:"Extract themes, characters, literary devices."
+    };
+
+    var prompt =
+      "You are an expert academic note-taker. Study every image carefully.\n\n" +
+      "Task: Convert all content into " + styleMap[style] + ".\n" +
+      (subjectHints[subject] ? "Subject hint: " + subjectHints[subject] + "\n" : "") +
+      "\n- Extract ALL information from every image\n- Use clean Markdown\n- End with ## 📌 Key Takeaways (3-5 bullets)\n- Output ONLY the notes";
+
+    var parts = [{ text: prompt }];
+    for (var i = 0; i < files.length; i++) {
+      var b64 = await toBase64(files[i]);
+      parts.push({ inline_data: { mime_type: files[i].type, data: b64 } });
+    }
+
+    // ← Calls OUR server at /api/generate, NOT Google directly
+    var res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ parts: parts }], generationConfig: { temperature: 0.4, maxOutputTokens: 8192 } })
+    });
+
+    if (!res.ok) {
+      var e = await res.json().catch(function(){return{};});
+      throw new Error(e.error || "Server error " + res.status);
+    }
+
+    var data = await res.json();
+    rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    if (!rawText) throw new Error("No content returned — please try again.");
+
+    clearInterval(ticker);
+    loadingWrap.classList.remove("show");
+    showResults(rawText);
+
+  } catch (err) {
+    clearInterval(ticker);
+    loadingWrap.classList.remove("show");
+    uploadSection.style.display = "block";
+    errorMsg.textContent = "⚠ " + (err.message || "Something went wrong.");
+    errorMsg.classList.add("show");
+    console.error(err);
+  }
+}
+
+function showResults(text) {
+  document.getElementById("raw-out").textContent    = text;
+  document.getElementById("rendered-out").innerHTML = md2html(text);
+  resultsWrap.classList.add("show");
+  resultsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function md2html(md) {
+  var h = md
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/^# (.+)$/gm,"<h1>$1</h1>").replace(/^## (.+)$/gm,"<h2>$1</h2>").replace(/^### (.+)$/gm,"<h3>$1</h3>")
+    .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/`(.+?)`/g,"<code>$1</code>")
+    .replace(/^> (.+)$/gm,"<blockquote>$1</blockquote>").replace(/^-{3,}$/gm,"<hr>")
+    .replace(/^[*\-] (.+)$/gm,"<li>$1</li>").replace(/^\d+\. (.+)$/gm,"<li>$1</li>");
+  h = h.replace(/(<li>[^\n]*<\/li>\n?)+/g, function(m){ return "<ul>"+m+"</ul>"; });
+  h = h.split(/\n{2,}/).map(function(b){ var t=b.trim(); if(!t)return""; if(/^<[h1-6ulbhr]/.test(t))return t; return "<p>"+t+"</p>"; }).join("\n");
+  return h;
+}
+
+document.getElementById("ntab-preview").addEventListener("click", function(){ setTab("preview",this); });
+document.getElementById("ntab-raw").addEventListener("click",     function(){ setTab("raw",    this); });
+function setTab(id,btn){
+  document.querySelectorAll(".ntab").forEach(function(t){t.classList.remove("on");});
+  document.querySelectorAll(".tpane").forEach(function(p){p.classList.remove("on");});
+  btn.classList.add("on"); document.getElementById("pane-"+id).classList.add("on");
+}
+
+document.getElementById("btn-copy").addEventListener("click", function(){
+  navigator.clipboard.writeText(rawText).then(function(){ toast("Copied!"); });
+});
+document.getElementById("btn-dl").addEventListener("click", function(){
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rawText],{type:"text/markdown"}));
+  a.download = "notesnap-"+Date.now()+".md";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast("Downloaded!");
+});
+document.getElementById("btn-reset").addEventListener("click", function(){
+  files=[]; rawText=""; previewGrid.innerHTML="";
+  resultsWrap.classList.remove("show"); uploadSection.style.display="block";
+  scanBtn.disabled=true; optionsBlock.classList.remove("show"); errorMsg.classList.remove("show");
+  fileInput.value=""; window.scrollTo({top:0,behavior:"smooth"});
+});
+
+function toast(msg){
+  var el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show");
+  setTimeout(function(){ el.classList.remove("show"); },2400);
+}
+</script>
+</body>
+</html>
