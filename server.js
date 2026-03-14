@@ -12,7 +12,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.post("/api/generate", async (req, res) => {
   try {
     const geminiRes = await axios.post(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash:generateContent?key=" + API_KEY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + API_KEY,
       req.body,
       { headers: { "Content-Type": "application/json" } }
     );
