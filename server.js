@@ -12,7 +12,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.post("/api/generate", async (req, res) => {
   try {
     const geminiRes = await axios.post(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY,
       req.body,
       { headers: { "Content-Type": "application/json" } }
     );
@@ -28,4 +28,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("✅ NoteSnap is running on port " + PORT);
 });
-
