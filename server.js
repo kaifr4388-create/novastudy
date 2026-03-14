@@ -3,7 +3,7 @@ const axios   = require("axios");
 const path    = require("path");
 
 const app     = express();
-const API_KEY = "AIzaSyBFGAMj0CdG2oG9bvJmH3vrqRkdTyaywis";
+const API_KEY = process.env.GEMINI_API_KEY;
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -24,8 +24,8 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("✅ NoteSnap is running!");
-  console.log("👉 Open this in your browser: http://localhost:" + PORT);
+  console.log("✅ NoteSnap is running on port " + PORT);
 });
+
