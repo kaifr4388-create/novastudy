@@ -516,7 +516,7 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
 .choice-screen.show { display:block; }
 .choice-screen h2 { font-size:2rem; font-weight:700; letter-spacing:-0.03em; margin-bottom:0.4rem; }
 .choice-screen > p { font-size:0.85rem; color:var(--text2); margin-bottom:2.5rem; }
-.choice-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:0.85rem; max-width:680px; margin:0 auto; }
+.choice-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:0.85rem; max-width:900px; margin:0 auto; }
 .choice-card {
   background: var(--glass-1); border:1px solid var(--border); border-top-color:var(--border-top);
   border-radius:16px; padding:2rem 1.2rem; cursor:pointer; transition:all 0.22s;
@@ -527,6 +527,80 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
 .choice-icon { font-size:2rem; display:block; margin-bottom:0.9rem; }
 .choice-card h3 { font-family:'Syne',sans-serif; font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.35rem; }
 .choice-card p { font-size:0.7rem; color:var(--text2); line-height:1.5; }
+
+/* ── Nova Mode gold card ── */
+.choice-card.nova-mode-card {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(212,175,55,0.10) 0%, rgba(255,215,80,0.07) 50%, rgba(180,130,20,0.10) 100%);
+  border-color: rgba(212,175,55,0.28);
+  border-top-color: rgba(255,230,100,0.45);
+  box-shadow: 0 8px 40px rgba(180,130,20,0.18), 0 1px 0 rgba(255,230,100,0.15) inset;
+  padding: 1.6rem 2rem;
+  display: flex; align-items:center; gap:1.6rem; text-align:left;
+  position:relative; overflow:hidden;
+}
+.choice-card.nova-mode-card::before {
+  content:'';
+  position:absolute; top:0; left:-60%; width:40%; height:100%;
+  background: linear-gradient(90deg, transparent, rgba(255,220,80,0.08), transparent);
+  animation: nova-shimmer 3.5s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes nova-shimmer {
+  0%   { left:-60%; opacity:0; }
+  20%  { opacity:1; }
+  80%  { opacity:1; }
+  100% { left:120%; opacity:0; }
+}
+.choice-card.nova-mode-card::after {
+  content:'';
+  position:absolute; top:0; left:8%; right:8%; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(255,220,80,0.5), transparent);
+  pointer-events:none;
+}
+.choice-card.nova-mode-card:hover {
+  border-color: rgba(212,175,55,0.55);
+  box-shadow: 0 20px 60px rgba(180,130,20,0.28), 0 1px 0 rgba(255,230,100,0.2) inset;
+  transform:translateY(-5px);
+  background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(255,215,80,0.10) 50%, rgba(180,130,20,0.14) 100%);
+}
+.nova-card-icon {
+  width:56px; height:56px; border-radius:50%; flex-shrink:0;
+  background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(255,215,80,0.15));
+  border:1px solid rgba(212,175,55,0.4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem;
+  box-shadow: 0 0 20px rgba(212,175,55,0.15), 0 0 40px rgba(212,175,55,0.08);
+}
+.nova-card-body { flex:1; min-width:0; }
+.nova-card-body h3 {
+  font-family:'Syne',sans-serif; font-size:1rem; font-weight:800;
+  text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.25rem;
+  background: linear-gradient(90deg, #ffd700, #ffec80, #d4af37);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.nova-card-body p { font-size:0.75rem; color:rgba(255,215,80,0.55); line-height:1.55; }
+.nova-card-pills { display:flex; gap:0.4rem; flex-wrap:wrap; margin-top:0.65rem; }
+.nova-card-pill {
+  font-size:0.58rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:100px;
+  background: rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.22);
+  color:rgba(255,215,80,0.65); letter-spacing:0.05em; text-transform:uppercase;
+}
+.nova-card-arrow {
+  font-size:1.2rem; color:rgba(212,175,55,0.5);
+  transition:transform 0.22s, color 0.22s;
+  flex-shrink:0;
+}
+.choice-card.nova-mode-card:hover .nova-card-arrow { transform:translateX(5px); color:rgba(255,215,80,0.8); }
+@media(max-width:768px){
+  .choice-cards { grid-template-columns:1fr; }
+  .choice-card.nova-mode-card { flex-direction:column; text-align:center; }
+  .nova-card-pills { justify-content:center; }
+}
+@media(min-width:769px) and (max-width:900px){
+  .choice-cards { grid-template-columns:1fr 1fr; }
+  .choice-card.nova-mode-card { grid-column:1/-1; }
+}
 
 /* ── Notes ── */
 .results-wrap { display:none; }
@@ -1048,6 +1122,22 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
       <h2>Your notes are ready.</h2>
       <p style="color:var(--text2);font-size:0.85rem;margin-bottom:2.5rem;">What would you like to do?</p>
       <div class="choice-cards">
+        <!-- NOVA MODE GOLD CARD -->
+        <div class="choice-card nova-mode-card" onclick="soundClick();launchNovaMode();">
+          <div class="nova-card-icon">✦</div>
+          <div class="nova-card-body">
+            <h3>Nova Study Mode</h3>
+            <p>Full mastery experience — summary, flashcards, mind map, quiz, practical questions &amp; analytics</p>
+            <div class="nova-card-pills">
+              <span class="nova-card-pill">Flashcards</span>
+              <span class="nova-card-pill">Mind Map</span>
+              <span class="nova-card-pill">6-Phase Path</span>
+              <span class="nova-card-pill">Analytics</span>
+              <span class="nova-card-pill">Streaks</span>
+            </div>
+          </div>
+          <div class="nova-card-arrow">→</div>
+        </div>
         <div class="choice-card" id="choice-notes" onclick="soundClick();hideAllScreens();showNotes();setActivePill('nav-notes');">
           <span class="choice-icon">📖</span>
           <h3>View Notes</h3>
@@ -1127,6 +1217,104 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
   </div><!-- /app-inner -->
 </div><!-- /app-overlay -->
 
+<!-- ════════════════════════════════════════════════════
+     NOVA STUDY MODE OVERLAY
+════════════════════════════════════════════════════ -->
+<div id="nova-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:var(--bg);overflow:hidden;flex-direction:column;">
+
+  <!-- Nova Top Bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;background:rgba(5,5,7,0.8);backdrop-filter:var(--blur-lg);-webkit-backdrop-filter:var(--blur-lg);border-bottom:1px solid var(--border);flex-shrink:0;z-index:50;">
+    <div style="display:flex;align-items:center;gap:0.55rem;">
+      <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#ffd700,#d4af37);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(212,175,55,0.35);">
+        <span style="font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;color:#080808;">✦</span>
+      </div>
+      <span style="font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;letter-spacing:-0.02em;background:linear-gradient(90deg,#ffd700,#ffec80,#d4af37);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">Nova Mode</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <div id="nm-timer-pill" style="display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0.8rem;border-radius:100px;background:var(--glass-1);border:1px solid var(--border);font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:700;color:var(--text2);">
+        <div id="nm-timer-dot" style="width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse-dot 1.5s infinite;display:none;"></div>
+        <span id="nm-timer-display">0:00</span>
+      </div>
+      <div id="nm-streak-pill" style="display:none;align-items:center;gap:0.35rem;padding:0.3rem 0.8rem;border-radius:100px;background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);font-family:'Syne',sans-serif;font-size:0.64rem;font-weight:700;color:#fb923c;">
+        🔥 <span id="nm-streak-count">0</span>
+      </div>
+    </div>
+    <button onclick="closeNovaMode()" style="padding:0.35rem 0.85rem;border-radius:100px;background:transparent;border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border-h)';this.style.background='var(--glass-1)';" onmouseout="this.style.color='var(--text2)';this.style.borderColor='var(--border)';this.style.background='transparent';">← Exit Mode</button>
+  </div>
+
+  <!-- Nova Content -->
+  <div id="nova-content" style="flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;"></div>
+</div>
+
+<!-- NOVA MODE STYLES -->
+<style>
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+@keyframes nova-fade-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes nova-spin { to{transform:rotate(360deg)} }
+@keyframes nova-star-pop { from{transform:scale(0) rotate(-30deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+@keyframes nova-confetti { 0%{opacity:1;transform:translateY(0) rotate(0)} 100%{opacity:0;transform:translateY(80px) rotate(360deg)} }
+
+.nm-screen { display:flex;flex-direction:column;min-height:100%; }
+.nm-phase-wrap { flex:1;padding:1.5rem;max-width:820px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:1.5rem; }
+
+/* Step track */
+.nm-step-track { display:flex;align-items:center;justify-content:center;padding:1.1rem 1.5rem 0;gap:0;flex-shrink:0; }
+.nm-step-node { display:flex;flex-direction:column;align-items:center;gap:0.3rem;position:relative;z-index:2; }
+.nm-step-circle { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;border:1px solid var(--border);background:var(--glass-0);color:var(--text3);transition:all 0.4s cubic-bezier(0.16,1,0.3,1); }
+.nm-step-circle.done { background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.3);color:#4ade80; }
+.nm-step-circle.active { background:rgba(212,175,55,0.15);border-color:rgba(212,175,55,0.5);color:#ffd700;box-shadow:0 0 16px rgba(212,175,55,0.12); }
+.nm-step-label { font-size:0.55rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);white-space:nowrap;transition:color 0.3s; }
+.nm-step-node.active .nm-step-label { color:rgba(212,175,55,0.7); }
+.nm-step-node.done .nm-step-label { color:rgba(74,222,128,0.6); }
+.nm-step-line { flex:1;height:1px;background:var(--border);max-width:55px;min-width:14px;transition:background 0.4s;position:relative;top:-8px; }
+.nm-step-line.done { background:rgba(74,222,128,0.28); }
+
+/* Cards */
+.nm-card { background:var(--glass-0);backdrop-filter:var(--blur-md);-webkit-backdrop-filter:var(--blur-md);border:1px solid var(--border);border-top-color:var(--border-top);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,0.4),0 1px 0 rgba(255,255,255,0.07) inset;overflow:hidden;animation:nova-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.nm-card-header { padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.6rem;font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text2); }
+.nm-card-body { padding:1.3rem; }
+
+/* Tags */
+.nm-phase-tag { display:inline-flex;align-items:center;gap:0.4rem;font-family:'Syne',sans-serif;font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;padding:0.25rem 0.72rem;border-radius:100px;border:1px solid;margin-bottom:0.5rem; }
+.nm-phase-title { font-size:clamp(1.3rem,3vw,1.85rem);font-weight:700;letter-spacing:-0.03em;margin-bottom:0.28rem;font-family:'Syne',sans-serif; }
+.nm-phase-sub { font-size:0.82rem;color:var(--text2);line-height:1.6; }
+
+/* Buttons */
+.nm-btn { padding:0.45rem 1.1rem;border-radius:100px;font-family:'Syne',sans-serif;font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.18s;white-space:nowrap; }
+.nm-btn:hover { border-color:var(--border-h);color:var(--text);background:var(--glass-1); }
+.nm-btn.primary { background:rgba(255,255,255,0.9);color:#0a0a0a;border-color:transparent; }
+.nm-btn.primary:hover { background:#fff; }
+.nm-btn.gold { background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(255,215,80,0.12));border-color:rgba(212,175,55,0.4);color:#ffd700; }
+.nm-btn.gold:hover { background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(255,215,80,0.2));border-color:rgba(212,175,55,0.6); }
+
+/* Key points */
+.nm-key-point { display:flex;align-items:flex-start;gap:0.7rem;padding:0.65rem 0.85rem;border-radius:10px;background:var(--glass-0);border:1px solid rgba(255,255,255,0.06);font-size:0.82rem;line-height:1.55;color:var(--text2);animation:nova-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) both;transition:border-color 0.2s; }
+.nm-key-point:hover { border-color:var(--border);color:var(--text); }
+.nm-kp-num { font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;color:var(--text3);flex-shrink:0;padding-top:0.1rem;min-width:16px; }
+
+/* Flashcard */
+.nm-fc-scene { width:100%;max-width:560px;perspective:1200px;cursor:pointer;user-select:none;margin:0 auto; }
+.nm-flashcard { width:100%;position:relative;transform-style:preserve-3d;transition:transform 0.55s cubic-bezier(0.16,1,0.3,1);border-radius:20px; }
+.nm-flashcard.flipped { transform:rotateY(180deg); }
+.nm-fc-face { width:100%;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;border-radius:20px;background:var(--glass-0);backdrop-filter:var(--blur-md);-webkit-backdrop-filter:var(--blur-md);border:1px solid var(--border);border-top-color:var(--border-top);box-shadow:0 20px 60px rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.10) inset;backface-visibility:hidden;-webkit-backface-visibility:hidden;text-align:center; }
+.nm-fc-face.back { position:absolute;inset:0;transform:rotateY(180deg);background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.14); }
+
+/* Quiz */
+.nm-opt-btn { padding:0.78rem 1rem;border-radius:12px;border:1px solid var(--border);background:var(--glass-0);font-family:'DM Sans',sans-serif;font-size:0.84rem;color:var(--text2);cursor:pointer;text-align:left;transition:all 0.15s;width:100%;margin-bottom:0.5rem; }
+.nm-opt-btn:hover:not(:disabled) { border-color:var(--border-h);background:var(--glass-1);color:var(--text);transform:translateX(4px); }
+.nm-opt-btn.correct { border-color:rgba(74,222,128,0.4);background:rgba(74,222,128,0.08);color:#4ade80;transform:translateX(4px); }
+.nm-opt-btn.wrong   { border-color:rgba(248,113,113,0.4);background:rgba(248,113,113,0.08);color:#fca5a5; }
+.nm-opt-btn:disabled { cursor:default; }
+
+/* Practical */
+.nm-prac-item { background:var(--glass-0);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:nova-fade-up 0.5s cubic-bezier(0.16,1,0.3,1) both;transition:border-color 0.2s;margin-bottom:0.75rem; }
+.nm-prac-item:hover { border-color:var(--border-h); }
+.nm-prac-q-row { display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.1rem;cursor:pointer; }
+.nm-prac-answer { max-height:0;overflow:hidden;transition:max-height 0.35s cubic-bezier(0.16,1,0.3,1); }
+.nm-prac-item.open .nm-prac-answer { max-height:400px; }
+.nm-prac-answer-inner { padding:0 1.1rem 1.1rem 3rem;font-size:0.81rem;color:var(--text2);line-height:1.65;border-top:1px solid var(--border);padding-top:0.85rem; }
+.nm-confetti-piece { position:fixed;top:-10px;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:9999;animation:nova-confetti 2s ease-in forwards; }
+</style>
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1456,6 +1644,641 @@ function toast(msg){var el=document.getElementById('toast');el.textContent=msg;e
 
 // Init
 hideAllScreens();showScreen('upload-section');
+
+// ═══════════════════════════════════════════════════════════════════════
+// ✦ NOVA STUDY MODE — Full mastery experience
+// ═══════════════════════════════════════════════════════════════════════
+var NM = {
+  data: null,
+  phase: 0,
+  totalPhases: 6,
+  sessionStart: null,
+  timerInterval: null,
+  streak: 0,
+  phaseScores: {},
+  quizState: {},
+  fcState: {}
+};
+
+// ── Sound helpers (reuse AudioCtx from parent scope if exists) ──
+var nmACtx = null;
+function nmGetAudio(){ if(!nmACtx){try{nmACtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}return nmACtx; }
+function nmTone(freq,type,dur,vol,delay){var c=nmGetAudio();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type||'sine';o.frequency.setValueAtTime(freq,c.currentTime+(delay||0));g.gain.setValueAtTime(0,c.currentTime+(delay||0));g.gain.linearRampToValueAtTime(vol||0.15,c.currentTime+(delay||0)+0.01);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+(delay||0)+dur);o.start(c.currentTime+(delay||0));o.stop(c.currentTime+(delay||0)+dur+0.05);}
+function nmSoundClick(){ nmTone(660,'sine',0.08,0.1); }
+function nmSoundFlip(){ nmTone(440,'sine',0.05,0.08);nmTone(550,'sine',0.06,0.08,0.05); }
+function nmSoundOk(){ nmTone(523,'sine',0.1,0.14);nmTone(659,'sine',0.1,0.14,0.08);nmTone(784,'sine',0.14,0.14,0.16); }
+function nmSoundWrong(){ nmTone(220,'sawtooth',0.1,0.09);nmTone(196,'sawtooth',0.12,0.09,0.1); }
+function nmSoundPhase(){ [523,587,659,698,784,880].forEach(function(f,i){nmTone(f,'sine',0.13,0.14,i*0.07);}); }
+function nmSoundComplete(){ [523,659,784,1047,1319].forEach(function(f,i){nmTone(f,'sine',0.18,0.17,i*0.08);}); }
+function nmSoundKnew(){ nmTone(523,'sine',0.07,0.11);nmTone(659,'sine',0.09,0.11,0.07); }
+function nmSoundAgain(){ nmTone(330,'sine',0.07,0.08); }
+function nmSoundStreak(){ nmTone(880,'sine',0.05,0.1);nmTone(1047,'sine',0.07,0.1,0.07); }
+
+// ── Confetti ──
+function nmConfetti(count){
+  count=count||25;
+  var colors=['#4ade80','#60a5fa','#f472b6','#fbbf24','#a78bfa','#ffd700'];
+  for(var i=0;i<count;i++){(function(i){setTimeout(function(){
+    var el=document.createElement('div');el.className='nm-confetti-piece';
+    el.style.left=(10+Math.random()*80)+'%';el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.width=(6+Math.random()*8)+'px';el.style.height=(6+Math.random()*8)+'px';
+    el.style.borderRadius=Math.random()>0.5?'50%':'2px';
+    el.style.animationDuration=(1.5+Math.random()*1.5)+'s';
+    document.body.appendChild(el);setTimeout(function(){el.remove();},3500);
+  },i*35);})(i);}
+}
+
+// ── Timer ──
+function nmStartTimer(){
+  NM.sessionStart=Date.now();
+  var dot=document.getElementById('nm-timer-dot'),disp=document.getElementById('nm-timer-display'),pill=document.getElementById('nm-timer-pill');
+  dot.style.display='block';pill.style.color='var(--text)';pill.style.borderColor='rgba(255,255,255,0.18)';
+  NM.timerInterval=setInterval(function(){
+    var e=Math.floor((Date.now()-NM.sessionStart)/1000),m=Math.floor(e/60),s=e%60;
+    disp.textContent=m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+function nmStopTimer(){ if(NM.timerInterval){clearInterval(NM.timerInterval);NM.timerInterval=null;} }
+function nmGetElapsed(){ return NM.sessionStart?Math.floor((Date.now()-NM.sessionStart)/1000):0; }
+
+// ── Streak ──
+function nmIncStreak(){
+  NM.streak++;
+  var pill=document.getElementById('nm-streak-pill');
+  pill.style.display='flex';
+  document.getElementById('nm-streak-count').textContent=NM.streak;
+  if(NM.streak>1)nmSoundStreak();
+  pill.style.transform='scale(1.2)';setTimeout(function(){pill.style.transition='transform 0.3s';pill.style.transform='';},200);
+}
+function nmResetStreak(){ NM.streak=0;document.getElementById('nm-streak-count').textContent=0; }
+
+// ── Escape HTML ──
+function nmEsc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Open / Close ──
+function launchNovaMode(){
+  var overlay=document.getElementById('nova-overlay');
+  overlay.style.display='flex';
+  // reset
+  NM.phase=0;NM.streak=0;NM.phaseScores={};NM.data=null;
+  document.getElementById('nm-streak-pill').style.display='none';
+  document.getElementById('nm-timer-display').textContent='0:00';
+  document.getElementById('nm-timer-dot').style.display='none';
+  document.getElementById('nm-streak-count').textContent='0';
+  nmShowLoading();
+}
+function closeNovaMode(){
+  nmSoundClick();
+  nmStopTimer();
+  document.getElementById('nova-overlay').style.display='none';
+  document.getElementById('nova-content').innerHTML='';
+}
+
+// ── Loading ──
+function nmShowLoading(){
+  var c=document.getElementById('nova-content');
+  c.innerHTML=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
+    <div style="position:relative;width:72px;height:72px;margin-bottom:1.8rem;">
+      <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent;border-top-color:rgba(212,175,55,0.8);animation:nova-spin 1.8s linear infinite;"></div>
+      <div style="position:absolute;inset:10px;border-radius:50%;border:1.5px solid transparent;border-right-color:rgba(212,175,55,0.45);animation:nova-spin 2.4s linear infinite reverse;"></div>
+      <div style="position:absolute;inset:20px;border-radius:50%;border:1.5px solid transparent;border-bottom-color:rgba(212,175,55,0.25);animation:nova-spin 3s linear infinite;"></div>
+      <div style="position:absolute;inset:28px;border-radius:50%;background:rgba(212,175,55,0.08);display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-family:Syne,sans-serif;font-weight:700;color:rgba(212,175,55,0.7);">✦</div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:0.4rem;text-align:center;">Building your mastery path…</div>
+    <div style="font-size:0.78rem;color:var(--text2);margin-bottom:2rem;text-align:center;">Nova is reading your notes</div>
+    <div id="nm-load-stages" style="display:flex;flex-direction:column;gap:0.55rem;width:100%;max-width:320px;"></div>
+  </div>`;
+
+  var stages=['📖 Reading &amp; understanding content','🧠 Extracting key concepts','🃏 Creating flashcards','🗺 Mapping relationships','❓ Generating quiz questions','💡 Building practical exercises'];
+  var stagesEl=document.getElementById('nm-load-stages');
+  stages.forEach(function(s,i){
+    var el=document.createElement('div');
+    el.id='nm-ls-'+i;
+    el.style.cssText='display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0.9rem;border-radius:10px;background:var(--glass-0);border:1px solid var(--border);font-size:0.75rem;color:var(--text3);opacity:0;transform:translateY(6px);transition:all 0.4s cubic-bezier(0.16,1,0.3,1);';
+    el.innerHTML=s+'<span id="nm-lss-'+i+'" style="margin-left:auto;width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);border-top-color:rgba(255,255,255,0.7);animation:nova-spin 0.8s linear infinite;display:none;"></span>';
+    stagesEl.appendChild(el);
+    setTimeout(function(){el.style.opacity='1';el.style.transform='none';el.style.color='var(--text2)';document.getElementById('nm-lss-'+i).style.display='block';},i*550);
+  });
+
+  // Fire API
+  nmGenerate();
+}
+
+// ── API ──
+async function nmGenerate(){
+  try{
+    var text=rawText||'';
+    if(!text){closeNovaMode();toast('Generate notes first, then launch Nova Mode.');return;}
+    var prompt=`You are NovaStudy AI. Generate a complete study package in STRICT raw JSON only (no markdown, no backticks):
+{
+  "topic":"short title",
+  "summary":{
+    "overview":"2-3 sentence overview",
+    "keyPoints":["point 1","point 2","point 3","point 4","point 5","point 6"],
+    "definitions":[{"term":"term","definition":"definition"},{"term":"term","definition":"definition"},{"term":"term","definition":"definition"}],
+    "importantFacts":["fact 1","fact 2","fact 3","fact 4"],
+    "commonMistakes":["mistake 1","mistake 2","mistake 3"]
+  },
+  "flashcards":[
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"}
+  ],
+  "mindmap":{
+    "center":"main topic",
+    "branches":[
+      {"label":"branch 1","color":"#4ade80","children":["sub1","sub2","sub3"]},
+      {"label":"branch 2","color":"#60a5fa","children":["sub1","sub2","sub3"]},
+      {"label":"branch 3","color":"#f472b6","children":["sub1","sub2"]},
+      {"label":"branch 4","color":"#fbbf24","children":["sub1","sub2","sub3"]},
+      {"label":"branch 5","color":"#a78bfa","children":["sub1","sub2"]}
+    ]
+  },
+  "quiz":[
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":0,"explanation":"why"},
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":1,"explanation":"why"},
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":2,"explanation":"why"},
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":3,"explanation":"why"},
+    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":0,"explanation":"why"},
+    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":1,"explanation":"why"},
+    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":0,"explanation":"why"},
+    {"type":"fib","question":"complete: ___ is...","answer":"answer","hint":"hint","explanation":"why"},
+    {"type":"fib","question":"___ formula is...","answer":"answer","hint":"hint","explanation":"why"},
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":0,"explanation":"why"}
+  ],
+  "practical":[
+    {"question":"open-ended application question 1","answer":"model answer with explanation"},
+    {"question":"scenario-based problem","answer":"model answer"},
+    {"question":"compare and contrast question","answer":"model answer"},
+    {"question":"real-world application","answer":"model answer"},
+    {"question":"synthesis question","answer":"model answer"},
+    {"question":"critical thinking question","answer":"model answer"}
+  ]
+}
+
+STUDY CONTENT:
+${text.substring(0,6000)}`;
+
+    var resp=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.5,maxOutputTokens:4096}})});
+    if(!resp.ok)throw new Error('API '+resp.status);
+    var data=await resp.json();
+    var raw=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'';
+    raw=raw.replace(/```json|```/g,'').trim();
+    var s=raw.indexOf('{'),e=raw.lastIndexOf('}');
+    if(s===-1||e===-1)throw new Error('No JSON');
+    NM.data=JSON.parse(raw.slice(s,e+1));
+    // Mark stages done
+    for(var i=0;i<6;i++){
+      var el=document.getElementById('nm-ls-'+i);
+      var sp=document.getElementById('nm-lss-'+i);
+      if(el){el.style.color='var(--text)';el.style.borderColor='rgba(74,222,128,0.2)';el.style.background='rgba(74,222,128,0.04)';}
+      if(sp){sp.style.animation='none';sp.style.borderColor='transparent';sp.innerHTML='<span style="color:#4ade80;font-size:0.7rem;">✓</span>';}
+    }
+    setTimeout(function(){
+      nmStartTimer();
+      nmRenderPhase(0);
+    },600);
+  }catch(err){
+    console.error(err);
+    closeNovaMode();
+    toast('Nova Mode failed — check API connection.');
+  }
+}
+
+// ── Phase system ──
+function nmRenderPhase(phase){
+  NM.phase=phase;
+  nmUpdateSteps();
+  var content=document.getElementById('nova-content');
+  content.scrollTop=0;
+  content.innerHTML='';
+  var stepTrack=document.createElement('div');
+  stepTrack.className='nm-step-track';
+  stepTrack.id='nm-step-track';
+  content.appendChild(stepTrack);
+  nmUpdateSteps();
+  var phaseDiv=document.createElement('div');
+  phaseDiv.id='nm-phase-area';
+  content.appendChild(phaseDiv);
+  var renderers=[nmRenderSummary,nmRenderFlashcards,nmRenderMindMap,nmRenderQuiz,nmRenderPractical,nmRenderAnalytics];
+  renderers[phase](phaseDiv);
+}
+
+function nmUpdateSteps(){
+  var track=document.getElementById('nm-step-track');
+  if(!track)return;
+  var labels=['Summary','Flashcards','Mind Map','Quiz','Practical','Analytics'];
+  track.innerHTML='';
+  for(var i=0;i<NM.totalPhases;i++){
+    var node=document.createElement('div');node.className='nm-step-node'+(i===NM.phase?' active':i<NM.phase?' done':'');
+    var circ=document.createElement('div');circ.className='nm-step-circle'+(i===NM.phase?' active':i<NM.phase?' done':'');
+    circ.textContent=i<NM.phase?'✓':(i+1);
+    var lbl=document.createElement('div');lbl.className='nm-step-label';lbl.textContent=labels[i];
+    node.appendChild(circ);node.appendChild(lbl);
+    track.appendChild(node);
+    if(i<NM.totalPhases-1){var line=document.createElement('div');line.className='nm-step-line'+(i<NM.phase?' done':'');track.appendChild(line);}
+  }
+}
+
+function nmNextPhase(){
+  nmSoundPhase();nmConfetti(20);
+  if(NM.phase<NM.totalPhases-1)nmRenderPhase(NM.phase+1);
+}
+
+// ── PHASE 1: SUMMARY ──
+function nmRenderSummary(container){
+  var s=NM.data.summary||{};
+  container.innerHTML='';
+  var w=document.createElement('div');w.className='nm-phase-wrap';
+  w.style.paddingBottom='2rem';
+  w.innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div>
+        <div class="nm-phase-tag" style="background:rgba(96,165,250,0.08);color:#60a5fa;border-color:rgba(96,165,250,0.2);">📖 Phase 1 of 5</div>
+        <div class="nm-phase-title">${nmEsc(NM.data.topic||'Summary')}</div>
+        <div class="nm-phase-sub">Read the overview — understand the big picture before drilling down.</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-start;">
+        <button class="nm-btn primary" onclick="nmSoundClick();NM.phaseScores.summary=100;nmNextPhase();">Understood → Flashcards</button>
+      </div>
+    </div>
+    <div class="nm-card">
+      <div class="nm-card-header">📌 Overview</div>
+      <div class="nm-card-body"><p style="font-size:0.86rem;color:var(--text2);line-height:1.7;">${nmEsc(s.overview||'')}</p></div>
+    </div>
+    <div class="nm-card">
+      <div class="nm-card-header">🔑 Key Points</div>
+      <div class="nm-card-body"><div id="nm-kp-list" style="display:flex;flex-direction:column;gap:0.5rem;"></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;" id="nm-mini-grid"></div>
+    <div class="nm-card">
+      <div class="nm-card-header">⚠️ Common Mistakes</div>
+      <div class="nm-card-body"><div id="nm-mistakes-list" style="display:flex;flex-direction:column;gap:0.5rem;"></div></div>
+    </div>`;
+  container.appendChild(w);
+
+  (s.keyPoints||[]).forEach(function(p,i){
+    var el=document.createElement('div');el.className='nm-key-point';el.style.animationDelay=(i*0.06)+'s';
+    el.innerHTML='<span class="nm-kp-num">0'+(i+1)+'</span><span>'+nmEsc(p)+'</span>';
+    w.querySelector('#nm-kp-list').appendChild(el);
+  });
+
+  var grid=w.querySelector('#nm-mini-grid');
+  var defs=s.definitions||[];var facts=s.importantFacts||[];
+  var dc=document.createElement('div');dc.className='nm-card';
+  dc.innerHTML='<div class="nm-card-header">📚 Definitions</div><div class="nm-card-body"><div style="display:flex;flex-direction:column;gap:0.4rem;">'+defs.map(function(d){return '<div style="font-size:0.79rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text);">'+nmEsc(d.term||d)+'</strong>'+(d.definition?' — '+nmEsc(d.definition):'')+'</div>';}).join('')+'</div></div>';
+  var fc=document.createElement('div');fc.className='nm-card';
+  fc.innerHTML='<div class="nm-card-header">⚡ Key Facts</div><div class="nm-card-body"><div style="display:flex;flex-direction:column;gap:0.4rem;">'+facts.map(function(f){return '<div style="font-size:0.79rem;color:var(--text2);line-height:1.5;padding-left:0.8rem;position:relative;"><span style="position:absolute;left:0;color:var(--text3);">·</span>'+nmEsc(f)+'</div>';}).join('')+'</div></div>';
+  grid.appendChild(dc);grid.appendChild(fc);
+
+  (s.commonMistakes||[]).forEach(function(m,i){
+    var el=document.createElement('div');el.className='nm-key-point';el.style.animationDelay=(i*0.06)+'s';
+    el.innerHTML='<span class="nm-kp-num" style="color:#f87171;">✗</span><span>'+nmEsc(m)+'</span>';
+    w.querySelector('#nm-mistakes-list').appendChild(el);
+  });
+}
+
+// ── PHASE 2: FLASHCARDS ──
+function nmRenderFlashcards(container){
+  var cards=NM.data.flashcards||[];
+  NM.fcState={cards:cards,current:0,knew:0,again:[],isFlipped:false};
+  container.innerHTML='';
+  var w=document.createElement('div');w.className='nm-phase-wrap';w.style.paddingBottom='2rem';
+  w.innerHTML=`
+    <div>
+      <div class="nm-phase-tag" style="background:rgba(251,146,60,0.08);color:#fb923c;border-color:rgba(251,146,60,0.2);">🃏 Phase 2 of 5</div>
+      <div class="nm-phase-title">Flashcards</div>
+      <div class="nm-phase-sub">Tap each card to reveal the answer. Mark honestly.</div>
+    </div>
+    <div id="nm-fc-wrap" style="display:flex;flex-direction:column;align-items:center;gap:1.4rem;"></div>`;
+  container.appendChild(w);
+  nmRenderFC(w.querySelector('#nm-fc-wrap'));
+}
+
+function nmRenderFC(wrap){
+  wrap.innerHTML='';
+  var cards=NM.fcState.cards,total=cards.length;
+  // Progress
+  var pct=(NM.fcState.current/total)*100;
+  wrap.innerHTML=`<div style="display:flex;align-items:center;gap:1rem;width:100%;max-width:560px;">
+    <div style="flex:1;height:3px;background:var(--glass-1);border-radius:100px;overflow:hidden;">
+      <div style="height:100%;background:rgba(251,146,60,0.6);border-radius:100px;width:${pct}%;transition:width 0.5s cubic-bezier(0.16,1,0.3,1);"></div>
+    </div>
+    <span style="font-family:'Syne',sans-serif;font-size:0.64rem;font-weight:700;color:var(--text3);white-space:nowrap;">${NM.fcState.current+1} / ${total}</span>
+  </div>`;
+
+  if(NM.fcState.current>=total){
+    var pct2=Math.round((NM.fcState.knew/total)*100);
+    NM.phaseScores.flashcards=pct2;
+    var done=document.createElement('div');done.className='nm-card';done.style.textAlign='center';done.style.padding='2.5rem';
+    done.innerHTML=`<div style="font-size:2.5rem;margin-bottom:0.8rem;">${pct2>=80?'🔥':pct2>=50?'⚡':'💪'}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;letter-spacing:-0.05em;">${pct2}%</div>
+      <div style="font-size:0.82rem;color:var(--text2);margin-bottom:1.5rem;">You knew ${NM.fcState.knew} of ${total} cards</div>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <button class="nm-btn" onclick="nmSoundClick();NM.fcState.current=0;NM.fcState.knew=0;NM.fcState.again=[];var w=document.getElementById('nm-fc-wrap');nmRenderFC(w);">↺ Restart</button>
+        <button class="nm-btn primary" onclick="nmSoundClick();nmNextPhase();">Mind Map →</button>
+      </div>`;
+    wrap.appendChild(done);
+    nmSoundPhase();nmConfetti(pct2>=80?35:15);
+    return;
+  }
+
+  var card=cards[NM.fcState.current];var isFlipped=false;
+  var scene=document.createElement('div');scene.className='nm-fc-scene';
+  scene.innerHTML=`<div class="nm-flashcard" id="nm-fc-card">
+    <div class="nm-fc-face front">
+      <div style="font-family:'Syne',sans-serif;font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--text3);margin-bottom:1rem;">Question</div>
+      <div style="font-size:1rem;font-weight:600;letter-spacing:-0.02em;line-height:1.45;">${nmEsc(card.front)}</div>
+      <div style="margin-top:1.1rem;font-size:0.64rem;color:var(--text3);">👆 Tap to reveal</div>
+    </div>
+    <div class="nm-fc-face back">
+      <div style="font-family:'Syne',sans-serif;font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--text3);margin-bottom:1rem;">Answer</div>
+      <div style="font-size:0.9rem;color:var(--text2);line-height:1.65;">${nmEsc(card.back)}</div>
+    </div>
+  </div>`;
+  scene.addEventListener('click',function(){if(!isFlipped){nmSoundFlip();isFlipped=true;document.getElementById('nm-fc-card').classList.add('flipped');ctrls.style.opacity='1';ctrls.style.pointerEvents='all';}});
+  wrap.appendChild(scene);
+
+  var ctrls=document.createElement('div');ctrls.style.cssText='display:flex;gap:0.75rem;align-items:center;opacity:0;pointer-events:none;transition:opacity 0.3s;';
+  ctrls.innerHTML=`<button class="nm-btn" style="background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.22);color:#fca5a5;" onclick="nmFcAgain()">✗ Again</button>
+    <button class="nm-btn" onclick="nmSoundClick();NM.fcState.current++;var w=document.getElementById('nm-fc-wrap');nmRenderFC(w);">→ Skip</button>
+    <button class="nm-btn" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.3);color:#4ade80;" onclick="nmFcKnew()">✓ Got It</button>`;
+  wrap.appendChild(ctrls);
+}
+function nmFcKnew(){nmSoundKnew();nmIncStreak();NM.fcState.knew++;NM.fcState.current++;nmRenderFC(document.getElementById('nm-fc-wrap'));}
+function nmFcAgain(){nmSoundAgain();nmResetStreak();NM.fcState.current++;nmRenderFC(document.getElementById('nm-fc-wrap'));}
+
+// ── PHASE 3: MIND MAP ──
+function nmRenderMindMap(container){
+  var mm=NM.data.mindmap||{center:'Topic',branches:[]};
+  container.innerHTML='';
+  var w=document.createElement('div');w.className='nm-phase-wrap';w.style.paddingBottom='2rem';
+  w.innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div>
+        <div class="nm-phase-tag" style="background:rgba(167,139,250,0.08);color:#a78bfa;border-color:rgba(167,139,250,0.2);">🗺 Phase 3 of 5</div>
+        <div class="nm-phase-title">Concept Mind Map</div>
+        <div class="nm-phase-sub">See how all ideas connect. Study the relationships.</div>
+      </div>
+      <button class="nm-btn primary" onclick="nmSoundClick();NM.phaseScores.mindmap=100;nmNextPhase();">Quiz →</button>
+    </div>
+    <div class="nm-card" style="overflow:hidden;">
+      <canvas id="nm-mm-canvas" style="width:100%;height:400px;display:block;"></canvas>
+      <div id="nm-mm-legend" style="display:flex;gap:0.7rem;flex-wrap:wrap;padding:0.7rem 1rem;border-top:1px solid var(--border);background:rgba(5,5,7,0.4);"></div>
+    </div>`;
+  container.appendChild(w);
+  setTimeout(function(){
+    var canvas=w.querySelector('#nm-mm-canvas');
+    canvas.width=canvas.offsetWidth*(window.devicePixelRatio||1);
+    canvas.height=canvas.offsetHeight*(window.devicePixelRatio||1);
+    var ctx=canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio||1,window.devicePixelRatio||1);
+    nmDrawMindMap(ctx,canvas.offsetWidth,canvas.offsetHeight,mm);
+    var legend=w.querySelector('#nm-mm-legend');
+    (mm.branches||[]).forEach(function(b){
+      var item=document.createElement('div');
+      item.style.cssText='display:flex;align-items:center;gap:0.4rem;font-size:0.62rem;color:var(--text3);';
+      item.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:'+b.color+';flex-shrink:0;"></div><span>'+nmEsc(b.label)+'</span>';
+      legend.appendChild(item);
+    });
+  },100);
+}
+
+function nmDrawMindMap(ctx,W,H,mm){
+  if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.beginPath();this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);this.closePath();};}
+  var cx=W/2,cy=H/2,branches=mm.branches||[],n=branches.length;
+  ctx.save();ctx.shadowColor='rgba(255,255,255,0.1)';ctx.shadowBlur=18;
+  ctx.fillStyle='rgba(255,255,255,0.08)';ctx.beginPath();ctx.arc(cx,cy,40,0,Math.PI*2);ctx.fill();ctx.restore();
+  ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,40,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.88)';ctx.font='bold 11px Syne, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  var cl=(mm.center||'Topic').substring(0,14);ctx.fillText(cl,cx,cy);
+  branches.forEach(function(branch,i){
+    var angle=(i/n)*Math.PI*2-Math.PI/2;
+    var bx=cx+Math.cos(angle)*130,by=cy+Math.sin(angle)*90;
+    ctx.strokeStyle=branch.color||'rgba(255,255,255,0.3)';ctx.lineWidth=2;ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(bx,by);ctx.stroke();
+    var hex=branch.color||'#fff';var r=parseInt(hex.slice(1,3)||'ff',16),g2=parseInt(hex.slice(3,5)||'ff',16),b2=parseInt(hex.slice(5,7)||'ff',16);
+    ctx.fillStyle='rgba('+r+','+g2+','+b2+',0.15)';ctx.strokeStyle=branch.color||'#fff';ctx.lineWidth=1.5;
+    ctx.roundRect(bx-40,by-15,80,30,8);ctx.fill();ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.85)';ctx.font='bold 9.5px DM Sans, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(branch.label.substring(0,14),bx,by);
+    (branch.children||[]).forEach(function(child,j){
+      var cAngle=angle+(j-(branch.children.length-1)/2)*0.42;
+      var ccx=cx+Math.cos(cAngle)*200,ccy=cy+Math.sin(cAngle)*(200*0.65);
+      ctx.strokeStyle=branch.color||'rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.globalAlpha=0.45;
+      ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(ccx,ccy);ctx.stroke();
+      ctx.setLineDash([]);ctx.globalAlpha=1;
+      ctx.fillStyle='rgba(255,255,255,0.05)';ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
+      ctx.roundRect(ccx-34,ccy-11,68,22,5);ctx.fill();ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='8.5px DM Sans, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(String(child).substring(0,16),ccx,ccy);
+    });
+  });
+}
+
+// ── PHASE 4: QUIZ ──
+function nmRenderQuiz(container){
+  NM.quizState={questions:NM.data.quiz||[],current:0,correct:0,wrong:0};
+  container.innerHTML='';
+  var w=document.createElement('div');w.className='nm-phase-wrap';w.style.paddingBottom='2rem';
+  w.innerHTML=`
+    <div>
+      <div class="nm-phase-tag" style="background:rgba(74,222,128,0.08);color:#4ade80;border-color:rgba(74,222,128,0.2);">❓ Phase 4 of 5</div>
+      <div class="nm-phase-title">Knowledge Quiz</div>
+      <div class="nm-phase-sub">Instant feedback on every answer. Trust the process.</div>
+    </div>
+    <div style="height:2px;background:var(--glass-1);border-radius:100px;overflow:hidden;flex-shrink:0;">
+      <div id="nm-q-pf" style="height:100%;background:rgba(74,222,128,0.6);border-radius:100px;width:0%;transition:width 0.5s cubic-bezier(0.16,1,0.3,1);"></div>
+    </div>
+    <div id="nm-q-area"></div>`;
+  container.appendChild(w);
+  nmRenderQuizQ(w.querySelector('#nm-q-area'));
+}
+
+function nmRenderQuizQ(area){
+  var total=NM.quizState.questions.length;
+  var pf=document.getElementById('nm-q-pf');if(pf)pf.style.width=((NM.quizState.current/total)*100)+'%';
+  if(NM.quizState.current>=total){
+    var pct=Math.round((NM.quizState.correct/total)*100);NM.phaseScores.quiz=pct;
+    area.innerHTML='';var res=document.createElement('div');res.className='nm-card';res.style.textAlign='center';res.style.padding='2.5rem';
+    var emoji=pct>=80?'🏆':pct>=60?'⚡':'💪';
+    res.innerHTML=`<div style="font-size:3rem;margin-bottom:0.8rem;">${emoji}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;letter-spacing:-0.05em;">${pct}%</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin:0.3rem 0 0.2rem;">${pct>=80?'Outstanding!':pct>=60?'Good work!':'Keep going!'}</div>
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:1.5rem;">${NM.quizState.correct} correct · ${NM.quizState.wrong} wrong</div>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <button class="nm-btn" onclick="nmSoundClick();NM.quizState.current=0;NM.quizState.correct=0;NM.quizState.wrong=0;nmRenderQuizQ(document.getElementById('nm-q-area'));">↺ Retry</button>
+        <button class="nm-btn primary" onclick="nmSoundClick();nmNextPhase();">Practical →</button>
+      </div>`;
+    area.appendChild(res);
+    if(pct>=80){nmSoundComplete();nmConfetti(40);}else nmSoundPhase();
+    return;
+  }
+  var q=NM.quizState.questions[NM.quizState.current];
+  var tl={mcq:'Multiple Choice',tf:'True / False',fib:'Fill in the Blank'};
+  area.innerHTML='';
+  var card=document.createElement('div');card.className='nm-card';card.style.padding='1.5rem';card.style.animation='nova-fade-up 0.4s cubic-bezier(0.16,1,0.3,1) both';
+  var html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.4rem;">
+    <span class="q-type-badge ${q.type}">${tl[q.type]||'Question'}</span>
+    <span style="font-size:0.64rem;color:var(--text3);font-family:'Syne',sans-serif;font-weight:600;">Q${NM.quizState.current+1} / ${total}</span>
+  </div>
+  <div style="font-size:0.95rem;font-weight:600;letter-spacing:-0.015em;line-height:1.5;margin-bottom:1.1rem;">${nmEsc(q.question)}</div>`;
+  if(q.type==='mcq'||q.type==='tf'){
+    (q.options||[]).forEach(function(opt,i){html+='<button class="nm-opt-btn" data-i="'+i+'">'+nmEsc(opt)+'</button>';});
+  }else{
+    html+='<input id="nm-fib-inp" type="text" placeholder="Your answer…" style="width:100%;padding:0.78rem 1rem;border-radius:12px;background:var(--glass-0);border:1px solid var(--border);font-family:\'DM Sans\',sans-serif;font-size:0.86rem;color:var(--text);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor=\'rgba(255,255,255,0.25)\'" onblur="this.style.borderColor=\'var(--border)\'">';
+    html+='<button id="nm-fib-sub" style="margin-top:0.6rem;padding:0.58rem 1.4rem;background:rgba(255,255,255,0.88);color:#0a0a0a;font-family:\'Syne\',sans-serif;font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;border:none;border-radius:100px;cursor:pointer;">Submit</button>';
+    if(q.hint)html+='<div style="font-size:0.64rem;color:var(--text3);margin-top:0.4rem;">💡 Hint: '+nmEsc(q.hint)+'</div>';
+  }
+  html+='<div id="nm-fb" style="display:none;margin-top:0.85rem;padding:0.8rem 1rem;border-radius:12px;font-size:0.8rem;line-height:1.55;border:1px solid;"></div>';
+  html+='<button id="nm-q-next" style="display:none;margin-top:0.85rem;padding:0.6rem 1.5rem;background:rgba(255,255,255,0.88);color:#0a0a0a;font-family:\'Syne\',sans-serif;font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;border:none;border-radius:100px;cursor:pointer;">'+(NM.quizState.current+1<total?'Next →':'See Results →')+'</button>';
+  card.innerHTML=html;area.appendChild(card);
+  if(q.type==='mcq'||q.type==='tf'){
+    card.querySelectorAll('.nm-opt-btn').forEach(function(btn){btn.addEventListener('click',function(){
+      var idx=parseInt(btn.dataset.i);
+      card.querySelectorAll('.nm-opt-btn').forEach(function(b){b.disabled=true;});
+      var ok=idx===q.correctIndex;
+      card.querySelectorAll('.nm-opt-btn')[q.correctIndex].classList.add('correct');
+      if(!ok){card.querySelectorAll('.nm-opt-btn')[idx].classList.add('wrong');NM.quizState.wrong++;nmSoundWrong();nmResetStreak();}
+      else{NM.quizState.correct++;nmSoundOk();nmIncStreak();}
+      nmShowFB(ok,q.explanation,ok?null:(q.options||[])[q.correctIndex]);
+    });});
+  }else{
+    var fi=card.querySelector('#nm-fib-inp'),fs=card.querySelector('#nm-fib-sub');
+    function doFIB(){var val=fi.value.trim();if(!val)return;var ok=val.toLowerCase()===q.answer.toLowerCase();fi.disabled=true;fs.disabled=true;fi.style.borderColor=ok?'rgba(74,222,128,0.4)':'rgba(248,113,113,0.4)';if(ok){NM.quizState.correct++;nmSoundOk();nmIncStreak();}else{NM.quizState.wrong++;nmSoundWrong();nmResetStreak();}nmShowFB(ok,q.explanation,ok?null:q.answer);}
+    fs.addEventListener('click',doFIB);fi.addEventListener('keydown',function(e){if(e.key==='Enter')doFIB();});
+  }
+  card.querySelector('#nm-q-next').addEventListener('click',function(){nmSoundClick();NM.quizState.current++;nmRenderQuizQ(area);});
+}
+function nmShowFB(ok,explanation,correct){
+  var fb=document.getElementById('nm-fb');if(!fb)return;
+  var msg=ok?'✓ Correct! ':'✗ Incorrect. ';
+  if(!ok&&correct)msg+='Answer: <strong>'+nmEsc(correct)+'</strong>. ';
+  if(explanation)msg+=nmEsc(explanation);
+  fb.style.display='block';fb.className='';
+  fb.style.background=ok?'rgba(74,222,128,0.07)':'rgba(248,113,113,0.07)';
+  fb.style.borderColor=ok?'rgba(74,222,128,0.2)':'rgba(248,113,113,0.2)';
+  fb.style.color=ok?'#4ade80':'#fca5a5';
+  fb.innerHTML=msg;
+  document.getElementById('nm-q-next').style.display='inline-block';
+}
+
+// ── PHASE 5: PRACTICAL ──
+function nmRenderPractical(container){
+  var qs=NM.data.practical||[];NM.phaseScores.practical=100;
+  container.innerHTML='';
+  var w=document.createElement('div');w.className='nm-phase-wrap';w.style.paddingBottom='2rem';
+  w.innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div>
+        <div class="nm-phase-tag" style="background:rgba(251,191,36,0.08);color:#fbbf24;border-color:rgba(251,191,36,0.2);">💡 Phase 5 of 5</div>
+        <div class="nm-phase-title">Practical Questions</div>
+        <div class="nm-phase-sub">Apply your knowledge. Tap to reveal model answers.</div>
+      </div>
+      <button class="nm-btn primary" onclick="nmSoundClick();nmNextPhase();">View Analytics →</button>
+    </div>
+    <div id="nm-prac-list"></div>`;
+  container.appendChild(w);
+  var list=w.querySelector('#nm-prac-list');
+  qs.forEach(function(q,i){
+    var item=document.createElement('div');item.className='nm-prac-item';item.style.animationDelay=(i*0.07)+'s';
+    item.innerHTML=`<div class="nm-prac-q-row" onclick="nmTogglePrac(this)">
+      <span style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,0.15);flex-shrink:0;">0${i+1}</span>
+      <span style="font-size:0.87rem;font-weight:600;line-height:1.5;flex:1;">${nmEsc(q.question)}</span>
+      <span id="nm-pt-${i}" style="font-size:0.75rem;color:var(--text3);flex-shrink:0;transition:transform 0.25s;">▼</span>
+    </div>
+    <div class="nm-prac-answer"><div class="nm-prac-answer-inner">${nmEsc(q.answer)}</div></div>`;
+    list.appendChild(item);
+  });
+}
+function nmTogglePrac(row){
+  nmSoundClick();
+  var item=row.closest('.nm-prac-item');
+  var wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.nm-prac-item.open').forEach(function(el){el.classList.remove('open');});
+  if(!wasOpen)item.classList.add('open');
+}
+
+// ── PHASE 6: ANALYTICS ──
+function nmRenderAnalytics(container){
+  nmStopTimer();
+  var elapsed=nmGetElapsed(),m=Math.floor(elapsed/60),s=elapsed%60;
+  var timeStr=(m>0?m+'m ':'')+s+'s';
+  var fcP=NM.phaseScores.flashcards||0,qP=NM.phaseScores.quiz||0;
+  var overall=Math.min(100,Math.round(fcP*0.4+qP*0.4+20));
+  container.innerHTML='';
+  var w=document.createElement('div');w.style.cssText='flex:1;padding:1.5rem;max-width:820px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:1.5rem;padding-bottom:2rem;';
+  var circ=2*Math.PI*54,dashOff=circ*(1-overall/100);
+  w.innerHTML=`
+    <div class="nm-card" style="padding:2rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
+      <div style="position:relative;flex-shrink:0;">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="54" fill="none" stroke="rgba(212,175,55,0.08)" stroke-width="8"/>
+          <circle cx="65" cy="65" r="54" fill="none" stroke="rgba(212,175,55,0.7)" stroke-width="8"
+            stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${dashOff}"
+            transform="rotate(-90 65 65)" style="transition:stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1);"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+          <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;letter-spacing:-0.05em;line-height:1;background:linear-gradient(135deg,#ffd700,#d4af37);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">${overall}%</div>
+          <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-top:0.2rem;">Mastery</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:1.45rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:0.28rem;font-family:'Syne',sans-serif;">${overall>=80?'Mastery Achieved! 🔥':overall>=60?'Strong Progress ⚡':'Keep Going 💪'}</div>
+        <div style="font-size:0.83rem;color:var(--text2);margin-bottom:1.1rem;line-height:1.55;">Session complete. You spent <strong>${timeStr}</strong> in deep focus.</div>
+        <div style="display:flex;gap:0.45rem;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:0.35rem;padding:0.28rem 0.72rem;border-radius:100px;font-size:0.62rem;font-weight:600;border:1px solid var(--border);color:var(--text2);"><div style="width:6px;height:6px;border-radius:50%;background:#4ade80;"></div>${timeStr}</div>
+          <div style="display:flex;align-items:center;gap:0.35rem;padding:0.28rem 0.72rem;border-radius:100px;font-size:0.62rem;font-weight:600;border:1px solid var(--border);color:var(--text2);"><div style="width:6px;height:6px;border-radius:50%;background:#fb923c;"></div>Streak: ${NM.streak}</div>
+          <div style="display:flex;align-items:center;gap:0.35rem;padding:0.28rem 0.72rem;border-radius:100px;font-size:0.62rem;font-weight:600;border:1px solid var(--border);color:var(--text2);"><div style="width:6px;height:6px;border-radius:50%;background:#a78bfa;"></div>5 phases</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem;" id="nm-stat-grid">
+      ${nmStatCard(fcP+'%','Flashcard Score','#4ade80',0.05)}
+      ${nmStatCard(qP+'%','Quiz Score','#60a5fa',0.1)}
+      ${nmStatCard(timeStr,'Time Focused','#fbbf24',0.15)}
+      ${nmStatCard(NM.data.flashcards?NM.data.flashcards.length:0,'Cards Studied','var(--text)',0.2)}
+      ${nmStatCard(NM.data.quiz?NM.data.quiz.length:0,'Questions Done','var(--text)',0.25)}
+      ${nmStatCard(NM.streak,'Best Streak','#fb923c',0.3)}
+    </div>
+
+    <div class="nm-card">
+      <div class="nm-card-header">📊 Phase Breakdown</div>
+      <div class="nm-card-body">
+        ${nmPhaseRow('📖','Summary',100,'rgba(96,165,250,0.7)')}
+        ${nmPhaseRow('🃏','Flashcards',fcP,'rgba(251,146,60,0.7)')}
+        ${nmPhaseRow('🗺','Mind Map',100,'rgba(167,139,250,0.7)')}
+        ${nmPhaseRow('❓','Quiz',qP,'rgba(74,222,128,0.7)')}
+        ${nmPhaseRow('💡','Practical',100,'rgba(251,191,36,0.7)')}
+      </div>
+    </div>
+
+    <div class="nm-card" style="text-align:center;padding:2.5rem 1.5rem;">
+      <span style="font-size:3.5rem;display:block;margin-bottom:0.7rem;animation:nova-star-pop 0.6s 0.6s cubic-bezier(0.16,1,0.3,1) both;">${overall>=80?'🏆':overall>=60?'⚡':'🌱'}</span>
+      <div style="font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;letter-spacing:-0.04em;margin-bottom:0.35rem;">${overall>=80?'Knowledge Mastered':overall>=60?'Solid Foundation':'Foundation Building'}</div>
+      <div style="font-size:0.83rem;color:var(--text2);line-height:1.65;max-width:360px;margin:0 auto 1.5rem;">${overall>=80?'Strong recall across all phases. Return tomorrow to reinforce it.':overall>=60?'Good progress! Review flashcards once more to push above 80%.':'Revisit the summary and flashcards, then retake the quiz.'}</div>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <button class="nm-btn" onclick="nmSoundClick();nmRenderPhase(0);">↺ Restart</button>
+        <button class="nm-btn" onclick="nmSoundClick();nmRenderPhase(3);">↺ Redo Quiz</button>
+        <button class="nm-btn gold" onclick="nmSoundClick();closeNovaMode();">Done ✦</button>
+      </div>
+    </div>`;
+  container.appendChild(w);
+  setTimeout(function(){nmSoundComplete();nmConfetti(overall>=80?55:28);},500);
+}
+
+function nmStatCard(val,label,color,delay){
+  return '<div class="nm-card" style="text-align:center;padding:1.1rem;animation:nova-fade-up 0.5s '+delay+'s cubic-bezier(0.16,1,0.3,1) both;"><div style="font-family:\'Syne\',sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-0.05em;line-height:1;margin-bottom:0.28rem;color:'+color+';">'+val+'</div><div style="font-family:\'Syne\',sans-serif;font-size:0.56rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);">'+label+'</div></div>';
+}
+function nmPhaseRow(icon,name,pct,color){
+  return '<div style="display:flex;align-items:center;gap:0.85rem;padding:0.65rem 0;border-bottom:1px solid var(--border);"><span style="font-size:0.9rem;flex-shrink:0;">'+icon+'</span><span style="font-size:0.8rem;font-weight:600;flex:1;">'+name+'</span><div style="height:4px;width:80px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:100px;transition:width 1s cubic-bezier(0.16,1,0.3,1);"></div></div><span style="font-family:\'Syne\',sans-serif;font-size:0.75rem;font-weight:700;color:var(--text2);white-space:nowrap;">'+pct+'%</span></div>';
+}
 </script>
 </body>
 </html>
