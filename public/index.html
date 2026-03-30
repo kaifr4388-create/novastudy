@@ -1220,7 +1220,7 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
 <!-- ════════════════════════════════════════════════════
      NOVA STUDY MODE OVERLAY
 ════════════════════════════════════════════════════ -->
-<div id="nova-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:var(--bg);overflow:hidden;flex-direction:column;">
+<div id="nova-overlay" style="display:none;position:fixed;inset:0;z-index:600;background:var(--bg);overflow:hidden;flex-direction:column;">
 
   <!-- Nova Top Bar -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;background:rgba(5,5,7,0.8);backdrop-filter:var(--blur-lg);-webkit-backdrop-filter:var(--blur-lg);border-bottom:1px solid var(--border);flex-shrink:0;z-index:50;">
@@ -1243,7 +1243,7 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
   </div>
 
   <!-- Nova Content -->
-  <div id="nova-content" style="flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;"></div>
+  <div id="nova-content" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;"></div>
 </div>
 
 <!-- NOVA MODE STYLES -->
@@ -1719,12 +1719,18 @@ function nmEsc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;
 function launchNovaMode(){
   var overlay=document.getElementById('nova-overlay');
   overlay.style.display='flex';
-  // reset
+  overlay.style.flexDirection='column';
+  // reset state
   NM.phase=0;NM.streak=0;NM.phaseScores={};NM.data=null;
-  document.getElementById('nm-streak-pill').style.display='none';
-  document.getElementById('nm-timer-display').textContent='0:00';
-  document.getElementById('nm-timer-dot').style.display='none';
-  document.getElementById('nm-streak-count').textContent='0';
+  var streakPill=document.getElementById('nm-streak-pill');
+  if(streakPill)streakPill.style.display='none';
+  var timerDisp=document.getElementById('nm-timer-display');
+  if(timerDisp)timerDisp.textContent='0:00';
+  var timerDot=document.getElementById('nm-timer-dot');
+  if(timerDot)timerDot.style.display='none';
+  var streakCount=document.getElementById('nm-streak-count');
+  if(streakCount)streakCount.textContent='0';
+  nmStopTimer();
   nmShowLoading();
 }
 function closeNovaMode(){
