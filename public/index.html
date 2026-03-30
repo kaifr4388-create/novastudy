@@ -382,7 +382,8 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
 /* ══════════════════════════════════════════════════════
    SCROLL REVEAL
 ══════════════════════════════════════════════════════ */
-.reveal { opacity:0; transform:translateY(18px); transition:opacity 0.65s ease,transform 0.65s ease; }
+.reveal { opacity:1; transform:none; transition:opacity 0.65s ease,transform 0.65s ease; }
+.reveal.will-animate { opacity:0; transform:translateY(18px); }
 .reveal.visible { opacity:1; transform:none; }
 
 /* ══════════════════════════════════════════════════════
@@ -1220,7 +1221,7 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
 <!-- ════════════════════════════════════════════════════
      NOVA STUDY MODE OVERLAY
 ════════════════════════════════════════════════════ -->
-<div id="nova-overlay" style="display:none;position:fixed;inset:0;z-index:600;background:var(--bg);overflow:hidden;flex-direction:column;">
+<div id="nova-overlay" style="display:none;position:fixed;inset:0;z-index:600;background:var(--bg);overflow:hidden;flex-direction:column;pointer-events:none;">
 
   <!-- Nova Top Bar -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;background:rgba(5,5,7,0.8);backdrop-filter:var(--blur-lg);-webkit-backdrop-filter:var(--blur-lg);border-bottom:1px solid var(--border);flex-shrink:0;z-index:50;">
@@ -1243,7 +1244,7 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
   </div>
 
   <!-- Nova Content -->
-  <div id="nova-content" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;"></div>
+  <div id="nova-content" style="flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;"></div>
 </div>
 
 <!-- NOVA MODE STYLES -->
@@ -1347,7 +1348,8 @@ footer { border-top:1px solid var(--border); padding:2.2rem 1.5rem; display:flex
 // ═══════════════════════════════════════════════════════
 (function(){
   var els=document.querySelectorAll('.reveal');
-  var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.12});
+  els.forEach(function(el){el.classList.add('will-animate');});
+  var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');e.target.classList.remove('will-animate');io.unobserve(e.target);}});},{threshold:0.12});
   els.forEach(function(el){io.observe(el);});
 })();
 
@@ -1716,215 +1718,29 @@ function nmResetStreak(){ NM.streak=0;document.getElementById('nm-streak-count')
 function nmEsc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── Open / Close ──
-// ═══════════════════════════════════════════════════════════════
-// NOVA MODE — PIPELINE GENERATION
-// Each batch is a separate small API call (~1000-1500 tokens each)
-// Batch 1 (on launch):        summary + flashcards
-// Batch 2 (bg during phase 0): mindmap + quiz
-// Batch 3 (bg during phase 1): practical
-// ═══════════════════════════════════════════════════════════════
-
 function launchNovaMode(){
   var overlay=document.getElementById('nova-overlay');
   overlay.style.display='flex';
   overlay.style.flexDirection='column';
-  // reset all state
-  NM.phase=0; NM.streak=0; NM.phaseScores={};
-  NM.data={ topic:'', summary:null, flashcards:null, mindmap:null, quiz:null, practical:null };
-  NM.batchDone=[false,false,false]; // batch 0,1,2 done flags
-  NM.batchCallbacks=[null,null,null]; // called when batch finishes
-  var streakPill=document.getElementById('nm-streak-pill');
-  if(streakPill)streakPill.style.display='none';
-  var timerDisp=document.getElementById('nm-timer-display');
-  if(timerDisp)timerDisp.textContent='0:00';
-  var timerDot=document.getElementById('nm-timer-dot');
-  if(timerDot)timerDot.style.display='none';
-  var streakCount=document.getElementById('nm-streak-count');
-  if(streakCount)streakCount.textContent='0';
-  nmStopTimer();
-  nmShowInitialLoading();
+  overlay.style.pointerEvents='all';
+  NM.phase=0;NM.streak=0;NM.phaseScores={};NM.data=null;
+  document.getElementById('nm-streak-pill').style.display='none';
+  document.getElementById('nm-timer-display').textContent='0:00';
+  document.getElementById('nm-timer-dot').style.display='none';
+  document.getElementById('nm-streak-count').textContent='0';
+  nmShowLoading();
 }
-
 function closeNovaMode(){
   nmSoundClick();
   nmStopTimer();
-  document.getElementById('nova-overlay').style.display='none';
+  var overlay=document.getElementById('nova-overlay');
+  overlay.style.display='none';
+  overlay.style.pointerEvents='none';
   document.getElementById('nova-content').innerHTML='';
 }
 
-// ── Raw API call helper ──
-async function nmCallAPI(prompt){
-  var resp=await fetch('/api/generate',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      contents:[{parts:[{text:prompt}]}],
-      generationConfig:{temperature:0.5,maxOutputTokens:2048}
-    })
-  });
-  if(!resp.ok) throw new Error('HTTP '+resp.status);
-  var data=await resp.json();
-  var raw=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]
-    ?data.candidates[0].content.parts[0].text:'';
-  raw=raw.replace(/```json|```/g,'').trim();
-  var s=raw.indexOf('{'),e=raw.lastIndexOf('}');
-  if(s===-1||e===-1) throw new Error('No JSON in response');
-  return JSON.parse(raw.slice(s,e+1));
-}
-
-// ── BATCH 1: Summary + Flashcards ──
-async function nmBatch1(){
-  var text=(rawText||'').substring(0,4000);
-  var prompt=`You are NovaStudy AI. Based on the study content below, generate ONLY a summary and flashcards. Respond with STRICT raw JSON only — no markdown, no backticks, nothing else.
-
-{
-  "topic": "concise topic title (max 6 words)",
-  "summary": {
-    "overview": "2-3 sentence overview of the content",
-    "keyPoints": ["key point 1","key point 2","key point 3","key point 4","key point 5","key point 6"],
-    "definitions": [
-      {"term":"term 1","definition":"definition 1"},
-      {"term":"term 2","definition":"definition 2"},
-      {"term":"term 3","definition":"definition 3"}
-    ],
-    "importantFacts": ["fact 1","fact 2","fact 3","fact 4"],
-    "commonMistakes": ["mistake 1","mistake 2","mistake 3"]
-  },
-  "flashcards": [
-    {"front":"question or term","back":"answer or definition"},
-    {"front":"question or term","back":"answer or definition"},
-    {"front":"question or term","back":"answer or definition"},
-    {"front":"question or term","back":"answer or definition"},
-    {"front":"question or term","back":"answer or definition"},
-    {"front":"question or term","back":"answer or definition"},
-    {"front":"question or term","back":"answer or definition"},
-    {"front":"question or term","back":"answer or definition"}
-  ]
-}
-
-STUDY CONTENT:
-${text}`;
-  var result=await nmCallAPI(prompt);
-  NM.data.topic=result.topic||'';
-  NM.data.summary=result.summary||null;
-  NM.data.flashcards=result.flashcards||[];
-}
-
-// ── BATCH 2: Mind Map + Quiz ──
-async function nmBatch2(){
-  var text=(rawText||'').substring(0,4000);
-  var topic=NM.data.topic||'the topic';
-  var prompt=`You are NovaStudy AI. Based on the study content below about "${topic}", generate ONLY a mind map and quiz questions. Respond with STRICT raw JSON only — no markdown, no backticks, nothing else.
-
-{
-  "mindmap": {
-    "center": "main topic (max 3 words)",
-    "branches": [
-      {"label":"branch 1","color":"#4ade80","children":["subtopic","subtopic","subtopic"]},
-      {"label":"branch 2","color":"#60a5fa","children":["subtopic","subtopic","subtopic"]},
-      {"label":"branch 3","color":"#f472b6","children":["subtopic","subtopic"]},
-      {"label":"branch 4","color":"#fbbf24","children":["subtopic","subtopic","subtopic"]},
-      {"label":"branch 5","color":"#a78bfa","children":["subtopic","subtopic"]}
-    ]
-  },
-  "quiz": [
-    {"type":"mcq","question":"question text","options":["A","B","C","D"],"correctIndex":0,"explanation":"explanation"},
-    {"type":"mcq","question":"question text","options":["A","B","C","D"],"correctIndex":1,"explanation":"explanation"},
-    {"type":"mcq","question":"question text","options":["A","B","C","D"],"correctIndex":2,"explanation":"explanation"},
-    {"type":"mcq","question":"question text","options":["A","B","C","D"],"correctIndex":3,"explanation":"explanation"},
-    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":0,"explanation":"explanation"},
-    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":1,"explanation":"explanation"},
-    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":0,"explanation":"explanation"},
-    {"type":"fib","question":"The ___ is responsible for...","answer":"exact answer","hint":"one word hint","explanation":"explanation"},
-    {"type":"fib","question":"___ occurs when...","answer":"exact answer","hint":"hint","explanation":"explanation"},
-    {"type":"mcq","question":"question text","options":["A","B","C","D"],"correctIndex":0,"explanation":"explanation"}
-  ]
-}
-
-STUDY CONTENT:
-${text}`;
-  var result=await nmCallAPI(prompt);
-  NM.data.mindmap=result.mindmap||null;
-  NM.data.quiz=result.quiz||[];
-}
-
-// ── BATCH 3: Practical Questions ──
-async function nmBatch3(){
-  var text=(rawText||'').substring(0,4000);
-  var topic=NM.data.topic||'the topic';
-  var prompt=`You are NovaStudy AI. Based on the study content below about "${topic}", generate ONLY practical open-ended questions. Respond with STRICT raw JSON only — no markdown, no backticks, nothing else.
-
-{
-  "practical": [
-    {"question":"application question requiring real understanding","answer":"detailed model answer with explanation"},
-    {"question":"scenario-based problem to solve","answer":"model answer"},
-    {"question":"compare and contrast two concepts from the content","answer":"model answer"},
-    {"question":"real-world application question","answer":"model answer"},
-    {"question":"synthesis question combining multiple concepts","answer":"model answer"},
-    {"question":"critical thinking or evaluation question","answer":"model answer"}
-  ]
-}
-
-STUDY CONTENT:
-${text}`;
-  var result=await nmCallAPI(prompt);
-  NM.data.practical=result.practical||[];
-}
-
-// ── Trigger a background batch, call cb when done ──
-function nmRunBatch(batchNum, fn, cb){
-  if(NM.batchDone[batchNum]){ if(cb)cb(); return; }
-  fn().then(function(){
-    NM.batchDone[batchNum]=true;
-    nmUpdateStepReadiness();
-    if(cb)cb();
-  }).catch(function(err){
-    console.error('Nova batch '+batchNum+' failed:',err);
-    // Store error so we can show it when user reaches that phase
-    NM.batchError=NM.batchError||{};
-    NM.batchError[batchNum]=true;
-    nmUpdateStepReadiness();
-    if(cb)cb();
-  });
-}
-
-// ── Update step track to show which phases are ready vs loading ──
-function nmUpdateStepReadiness(){
-  // Phase 0,1 = batch 0; Phase 2,3 = batch 1; Phase 4 = batch 2
-  var phaseReady=[
-    NM.batchDone[0], // summary
-    NM.batchDone[0], // flashcards
-    NM.batchDone[1], // mindmap
-    NM.batchDone[1], // quiz
-    NM.batchDone[2], // practical
-    true             // analytics always ready
-  ];
-  for(var i=0;i<6;i++){
-    var circ=document.getElementById('nm-sc-'+i);
-    if(!circ) continue;
-    if(i<NM.phase){
-      // already done, keep green
-    } else if(i===NM.phase){
-      // current, gold
-    } else if(!phaseReady[i]){
-      // not ready yet — show mini spinner inside circle
-      if(!circ.querySelector('.nm-circ-spin')){
-        circ.innerHTML='<span class="nm-circ-spin" style="display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);border-top-color:rgba(255,255,255,0.5);animation:nova-spin 0.9s linear infinite;"></span>';
-      }
-    } else {
-      // ready — restore number if it still shows spinner
-      if(circ.querySelector('.nm-circ-spin')){
-        circ.innerHTML=i+1;
-      }
-    }
-  }
-}
-
-// ── Initial loading screen (only waits for batch 1) ──
-function nmShowInitialLoading(){
-  var text=rawText||'';
-  if(!text){ closeNovaMode(); toast('Scan your notes first, then launch Nova Mode.'); return; }
-
+// ── Loading ──
+function nmShowLoading(){
   var c=document.getElementById('nova-content');
   c.innerHTML=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
     <div style="position:relative;width:72px;height:72px;margin-bottom:1.8rem;">
@@ -1933,99 +1749,129 @@ function nmShowInitialLoading(){
       <div style="position:absolute;inset:20px;border-radius:50%;border:1.5px solid transparent;border-bottom-color:rgba(212,175,55,0.25);animation:nova-spin 3s linear infinite;"></div>
       <div style="position:absolute;inset:28px;border-radius:50%;background:rgba(212,175,55,0.08);display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-family:Syne,sans-serif;font-weight:700;color:rgba(212,175,55,0.7);">✦</div>
     </div>
-    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:0.3rem;text-align:center;">Reading your notes…</div>
-    <div style="font-size:0.78rem;color:var(--text2);margin-bottom:2rem;text-align:center;">Building summary &amp; flashcards</div>
-    <div style="display:flex;flex-direction:column;gap:0.5rem;width:100%;max-width:300px;">
-      <div id="nm-li-0" style="display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0.9rem;border-radius:10px;background:var(--glass-0);border:1px solid var(--border);font-size:0.75rem;color:var(--text2);opacity:0;transition:opacity 0.4s;">
-        📖 Reading &amp; understanding content
-        <span style="margin-left:auto;width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);border-top-color:rgba(255,255,255,0.7);animation:nova-spin 0.8s linear infinite;flex-shrink:0;"></span>
-      </div>
-      <div id="nm-li-1" style="display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0.9rem;border-radius:10px;background:var(--glass-0);border:1px solid var(--border);font-size:0.75rem;color:var(--text2);opacity:0;transition:opacity 0.4s;">
-        🃏 Creating flashcards
-        <span style="margin-left:auto;width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);border-top-color:rgba(255,255,255,0.7);animation:nova-spin 0.8s linear infinite;flex-shrink:0;"></span>
-      </div>
-    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:0.4rem;text-align:center;">Building your mastery path…</div>
+    <div style="font-size:0.78rem;color:var(--text2);margin-bottom:2rem;text-align:center;">Nova is reading your notes</div>
+    <div id="nm-load-stages" style="display:flex;flex-direction:column;gap:0.55rem;width:100%;max-width:320px;"></div>
   </div>`;
 
-  setTimeout(function(){var el=document.getElementById('nm-li-0');if(el)el.style.opacity='1';},100);
-  setTimeout(function(){var el=document.getElementById('nm-li-1');if(el)el.style.opacity='1';},400);
-
-  // Fire batch 1 — when done, show phase 0
-  nmRunBatch(0, nmBatch1, function(){
-    nmStartTimer();
-    nmRenderPhase(0);
-    // Immediately kick off batch 2 in background
-    nmRunBatch(1, nmBatch2, null);
+  var stages=['📖 Reading &amp; understanding content','🧠 Extracting key concepts','🃏 Creating flashcards','🗺 Mapping relationships','❓ Generating quiz questions','💡 Building practical exercises'];
+  var stagesEl=document.getElementById('nm-load-stages');
+  stages.forEach(function(s,i){
+    var el=document.createElement('div');
+    el.id='nm-ls-'+i;
+    el.style.cssText='display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0.9rem;border-radius:10px;background:var(--glass-0);border:1px solid var(--border);font-size:0.75rem;color:var(--text3);opacity:0;transform:translateY(6px);transition:all 0.4s cubic-bezier(0.16,1,0.3,1);';
+    el.innerHTML=s+'<span id="nm-lss-'+i+'" style="margin-left:auto;width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);border-top-color:rgba(255,255,255,0.7);animation:nova-spin 0.8s linear infinite;display:none;"></span>';
+    stagesEl.appendChild(el);
+    setTimeout(function(){el.style.opacity='1';el.style.transform='none';el.style.color='var(--text2)';document.getElementById('nm-lss-'+i).style.display='block';},i*550);
   });
-}
+
+  // Fire API
+  nmGenerate();
 }
 
-// ── Phase ready check ──
-// Phases 0,1 need batch 0 | Phases 2,3 need batch 1 | Phase 4 needs batch 2 | Phase 5 always ready
-function nmPhaseReady(phase){
-  if(phase<=1) return NM.batchDone[0];
-  if(phase<=3) return NM.batchDone[1];
-  if(phase===4) return NM.batchDone[2];
-  return true;
+// ── API ──
+async function nmGenerate(){
+  try{
+    var text=rawText||'';
+    if(!text){closeNovaMode();toast('Generate notes first, then launch Nova Mode.');return;}
+    var prompt=`You are NovaStudy AI. Generate a complete study package in STRICT raw JSON only (no markdown, no backticks):
+{
+  "topic":"short title",
+  "summary":{
+    "overview":"2-3 sentence overview",
+    "keyPoints":["point 1","point 2","point 3","point 4","point 5","point 6"],
+    "definitions":[{"term":"term","definition":"definition"},{"term":"term","definition":"definition"},{"term":"term","definition":"definition"}],
+    "importantFacts":["fact 1","fact 2","fact 3","fact 4"],
+    "commonMistakes":["mistake 1","mistake 2","mistake 3"]
+  },
+  "flashcards":[
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"},
+    {"front":"question","back":"answer"}
+  ],
+  "mindmap":{
+    "center":"main topic",
+    "branches":[
+      {"label":"branch 1","color":"#4ade80","children":["sub1","sub2","sub3"]},
+      {"label":"branch 2","color":"#60a5fa","children":["sub1","sub2","sub3"]},
+      {"label":"branch 3","color":"#f472b6","children":["sub1","sub2"]},
+      {"label":"branch 4","color":"#fbbf24","children":["sub1","sub2","sub3"]},
+      {"label":"branch 5","color":"#a78bfa","children":["sub1","sub2"]}
+    ]
+  },
+  "quiz":[
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":0,"explanation":"why"},
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":1,"explanation":"why"},
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":2,"explanation":"why"},
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":3,"explanation":"why"},
+    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":0,"explanation":"why"},
+    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":1,"explanation":"why"},
+    {"type":"tf","question":"True or False: statement","options":["True","False"],"correctIndex":0,"explanation":"why"},
+    {"type":"fib","question":"complete: ___ is...","answer":"answer","hint":"hint","explanation":"why"},
+    {"type":"fib","question":"___ formula is...","answer":"answer","hint":"hint","explanation":"why"},
+    {"type":"mcq","question":"q","options":["A","B","C","D"],"correctIndex":0,"explanation":"why"}
+  ],
+  "practical":[
+    {"question":"open-ended application question 1","answer":"model answer with explanation"},
+    {"question":"scenario-based problem","answer":"model answer"},
+    {"question":"compare and contrast question","answer":"model answer"},
+    {"question":"real-world application","answer":"model answer"},
+    {"question":"synthesis question","answer":"model answer"},
+    {"question":"critical thinking question","answer":"model answer"}
+  ]
 }
 
-// ── Kick off background batch needed for a future phase ──
-function nmEnsureBatch(phase){
-  if(phase>=1 && !NM.batchDone[1] && !NM._b1started){ NM._b1started=true; nmRunBatch(1,nmBatch2,null); }
-  if(phase>=3 && !NM.batchDone[2] && !NM._b2started){ NM._b2started=true; nmRunBatch(2,nmBatch3,null); }
+STUDY CONTENT:
+${text.substring(0,6000)}`;
+
+    var resp=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.5,maxOutputTokens:4096}})});
+    if(!resp.ok)throw new Error('API '+resp.status);
+    var data=await resp.json();
+    var raw=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'';
+    raw=raw.replace(/```json|```/g,'').trim();
+    var s=raw.indexOf('{'),e=raw.lastIndexOf('}');
+    if(s===-1||e===-1)throw new Error('No JSON');
+    NM.data=JSON.parse(raw.slice(s,e+1));
+    // Mark stages done
+    for(var i=0;i<6;i++){
+      var el=document.getElementById('nm-ls-'+i);
+      var sp=document.getElementById('nm-lss-'+i);
+      if(el){el.style.color='var(--text)';el.style.borderColor='rgba(74,222,128,0.2)';el.style.background='rgba(74,222,128,0.04)';}
+      if(sp){sp.style.animation='none';sp.style.borderColor='transparent';sp.innerHTML='<span style="color:#4ade80;font-size:0.7rem;">✓</span>';}
+    }
+    setTimeout(function(){
+      nmStartTimer();
+      nmRenderPhase(0);
+    },600);
+  }catch(err){
+    console.error(err);
+    closeNovaMode();
+    toast('Nova Mode failed — check API connection.');
+  }
 }
 
 // ── Phase system ──
 function nmRenderPhase(phase){
   NM.phase=phase;
+  nmUpdateSteps();
   var content=document.getElementById('nova-content');
   content.scrollTop=0;
   content.innerHTML='';
-
-  // Step track
   var stepTrack=document.createElement('div');
   stepTrack.className='nm-step-track';
   stepTrack.id='nm-step-track';
   content.appendChild(stepTrack);
   nmUpdateSteps();
-
   var phaseDiv=document.createElement('div');
   phaseDiv.id='nm-phase-area';
   content.appendChild(phaseDiv);
-
-  // If phase isn't ready yet, show waiting screen then auto-advance when ready
-  if(!nmPhaseReady(phase)){
-    nmRenderWaiting(phaseDiv, phase);
-    return;
-  }
-
   var renderers=[nmRenderSummary,nmRenderFlashcards,nmRenderMindMap,nmRenderQuiz,nmRenderPractical,nmRenderAnalytics];
   renderers[phase](phaseDiv);
-
-  // Trigger background generation for upcoming phases
-  nmEnsureBatch(phase+1);
-}
-
-// ── Waiting screen when next phase isn't ready ──
-function nmRenderWaiting(container, phase){
-  var labels=['Summary','Flashcards','Mind Map','Quiz','Practical'];
-  var name=labels[phase]||'Next Phase';
-  container.innerHTML=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;">
-    <div style="position:relative;width:56px;height:56px;margin-bottom:1.4rem;">
-      <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent;border-top-color:rgba(212,175,55,0.7);animation:nova-spin 1.8s linear infinite;"></div>
-      <div style="position:absolute;inset:10px;border-radius:50%;border:1.5px solid transparent;border-right-color:rgba(212,175,55,0.35);animation:nova-spin 2.6s linear infinite reverse;"></div>
-      <div style="position:absolute;inset:19px;border-radius:50%;background:rgba(212,175,55,0.08);display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:rgba(212,175,55,0.6);">✦</div>
-    </div>
-    <div style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;margin-bottom:0.3rem;">Generating ${name}…</div>
-    <div style="font-size:0.78rem;color:var(--text2);">Almost there — Nova is still writing</div>
-  </div>`;
-  // Poll until ready
-  var poll=setInterval(function(){
-    if(nmPhaseReady(phase)){
-      clearInterval(poll);
-      nmRenderPhase(phase);
-    }
-  },400);
 }
 
 function nmUpdateSteps(){
@@ -2034,39 +1880,19 @@ function nmUpdateSteps(){
   var labels=['Summary','Flashcards','Mind Map','Quiz','Practical','Analytics'];
   track.innerHTML='';
   for(var i=0;i<NM.totalPhases;i++){
-    var ready=nmPhaseReady(i);
-    var isDone=i<NM.phase;
-    var isActive=i===NM.phase;
-    var node=document.createElement('div');
-    node.className='nm-step-node'+(isActive?' active':isDone?' done':'');
-    var circ=document.createElement('div');
-    circ.className='nm-step-circle'+(isActive?' active':isDone?' done':'');
-    circ.id='nm-sc-'+i;
-    if(isDone){ circ.textContent='✓'; }
-    else if(!ready && !isActive){
-      // show tiny spinner — batch cooking
-      circ.innerHTML='<span style="display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.12);border-top-color:rgba(255,255,255,0.45);animation:nova-spin 0.9s linear infinite;"></span>';
-    } else {
-      circ.textContent=i+1;
-    }
+    var node=document.createElement('div');node.className='nm-step-node'+(i===NM.phase?' active':i<NM.phase?' done':'');
+    var circ=document.createElement('div');circ.className='nm-step-circle'+(i===NM.phase?' active':i<NM.phase?' done':'');
+    circ.textContent=i<NM.phase?'✓':(i+1);
     var lbl=document.createElement('div');lbl.className='nm-step-label';lbl.textContent=labels[i];
     node.appendChild(circ);node.appendChild(lbl);
     track.appendChild(node);
-    if(i<NM.totalPhases-1){
-      var line=document.createElement('div');
-      line.className='nm-step-line'+(isDone?' done':'');
-      track.appendChild(line);
-    }
+    if(i<NM.totalPhases-1){var line=document.createElement('div');line.className='nm-step-line'+(i<NM.phase?' done':'');track.appendChild(line);}
   }
 }
 
 function nmNextPhase(){
-  nmSoundPhase(); nmConfetti(20);
-  if(NM.phase<NM.totalPhases-1){
-    // Kick off batch 3 when entering flashcards (phase 1)
-    if(NM.phase===1 && !NM._b2started){ NM._b2started=true; nmRunBatch(2,nmBatch3,null); }
-    nmRenderPhase(NM.phase+1);
-  }
+  nmSoundPhase();nmConfetti(20);
+  if(NM.phase<NM.totalPhases-1)nmRenderPhase(NM.phase+1);
 }
 
 // ── PHASE 1: SUMMARY ──
