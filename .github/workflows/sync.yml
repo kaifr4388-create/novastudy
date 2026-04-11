@@ -18,4 +18,4 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          git push -f https://kaifr4388-create:$HF_TOKEN@huggingface.co/spaces/kaifr4388-create/novastudy HEAD:main
+          git push -f https://kaifr1:$HF_TOKEN@huggingface.co/spaces/kaifr1/novastudy HEAD:main
